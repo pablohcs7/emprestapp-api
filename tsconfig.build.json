@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "sourceMap": false,
+    "rootDir": "./test"
+  },
+  "include": [
+    "test/build-placeholder.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test/**/*.spec.ts",
+    "test/**/*.e2e-spec.ts"
+  ]
+}
