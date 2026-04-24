@@ -9,9 +9,7 @@ import { AuthTokenPayload, AuthTokenService } from './token.service';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(
-    private readonly authTokenService: Pick<AuthTokenService, 'verifyAccessToken'>,
-  ) {}
+  constructor(private readonly authTokenService: AuthTokenService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<{

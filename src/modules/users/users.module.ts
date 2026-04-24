@@ -1,12 +1,23 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { AuthModule } from '../auth/auth.module';
+import { ContactsModule } from '../contacts/contacts.module';
+import { LoansModule } from '../loans/loans.module';
+import { PaymentsModule } from '../payments/payments.module';
 import { UserRepository } from './domain/user.repository';
+import { UserExportService } from './application/user-export.service';
+import { UsersProfileComplianceService } from './application/users-profile-compliance.service';
 import { MongooseUserRepository } from './infrastructure/persistence/user.repository';
 import { userSchema, UserDocument } from './infrastructure/persistence/user.schema';
+import { UsersController } from './users.controller';
 
 @Module({
   imports: [
+    forwardRef(() => AuthModule),
+    forwardRef(() => ContactsModule),
+    forwardRef(() => LoansModule),
+    forwardRef(() => PaymentsModule),
     MongooseModule.forFeature([
       {
         name: UserDocument.name,
@@ -14,13 +25,21 @@ import { userSchema, UserDocument } from './infrastructure/persistence/user.sche
       },
     ]),
   ],
+  controllers: [UsersController],
   providers: [
     MongooseUserRepository,
+    UserExportService,
+    UsersProfileComplianceService,
     {
       provide: UserRepository,
       useClass: MongooseUserRepository,
     },
   ],
-  exports: [UserRepository, MongooseUserRepository],
+  exports: [
+    UserRepository,
+    MongooseUserRepository,
+    UserExportService,
+    UsersProfileComplianceService,
+  ],
 })
 export class UsersModule {}

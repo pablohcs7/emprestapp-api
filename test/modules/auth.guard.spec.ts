@@ -72,7 +72,7 @@ describe('auth guard and current-user helper', () => {
 
 const createTokenService = (
   error?: Error,
-): Pick<AuthTokenService, 'verifyAccessToken'> =>
+): AuthTokenService =>
   ({
     verifyAccessToken: async (token: string): Promise<AuthTokenPayload> => {
       if (error) {
@@ -84,7 +84,7 @@ const createTokenService = (
         email: token === 'valid-token' ? 'jane@example.com' : 'john@example.com',
       };
     },
-  }) as Pick<AuthTokenService, 'verifyAccessToken'>;
+  }) as unknown as AuthTokenService;
 
 const createExecutionContext = (
   request: Record<string, unknown> = {},

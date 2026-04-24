@@ -1,8 +1,7 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AuthModule } from '../auth/auth.module';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ContactLifecyclePolicyService } from './application/contact-lifecycle-policy.service';
 import { ContactsApplicationService } from './application/contacts.application.service';
 import { ContactsController } from './contacts.controller';
@@ -14,7 +13,7 @@ import { ContactDocument, contactSchema } from './infrastructure/persistence/con
 
 @Module({
   imports: [
-    AuthModule,
+    forwardRef(() => AuthModule),
     MongooseModule.forFeature([
       {
         name: ContactDocument.name,
@@ -24,7 +23,6 @@ import { ContactDocument, contactSchema } from './infrastructure/persistence/con
   ],
   controllers: [ContactsController],
   providers: [
-    JwtAuthGuard,
     ContactsApplicationService,
     ContactLifecyclePolicyService,
     MongooseContactRepository,

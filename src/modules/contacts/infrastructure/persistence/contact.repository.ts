@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { ContactRepository } from '../../domain/contact.repository';
 import {
@@ -72,7 +72,7 @@ export class MongooseContactRepository implements ContactRepository {
     userId: string,
     filters: ContactListFilters,
   ): Promise<ContactListResult> {
-    const query: FilterQuery<ContactDocument> = {
+    const query: Record<string, unknown> = {
       userId: new Types.ObjectId(userId),
     };
 
