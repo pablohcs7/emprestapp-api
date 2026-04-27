@@ -1,6 +1,6 @@
 # Roadmap
 
-**Current Milestone:** MVP backend release readiness completed
+**Current Milestone:** API repository isolated for multi-repository product delivery
 **Status:** Completed
 
 ---
@@ -158,8 +158,8 @@ Current sprint posture:
 
 ## Immediate Focus
 
-- Prepare commit/release packaging for the validated MVP backend
-- Decide whether to open a new post-MVP stabilization or delivery stream
+- Maintain the API as an independent repository under `emprestapp-api`
+- Coordinate future web and mobile delivery without reintroducing shared repository state
 
 ---
 

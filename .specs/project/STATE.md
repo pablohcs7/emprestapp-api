@@ -1,7 +1,7 @@
 # State
 
-**Last Updated:** 2026-04-27T11:45:00-03:00
-**Current Work:** Sprint 7 completed - local operational artifacts, release gate, and Docker Compose validation passed
+**Last Updated:** 2026-04-27T12:05:00-03:00
+**Current Work:** API repository isolated into `emprestapp-api`; web and mobile repositories initialized independently
 
 ---
 
@@ -49,11 +49,18 @@
 **Trade-off:** Some modules will intentionally wait even if engineering capacity exists.
 **Impact:** Work should be pulled according to sprint readiness, not only feature importance.
 
+### AD-007: Product repositories must be isolated by application boundary (2026-04-27)
+
+**Decision:** Split the workspace into `emprestapp-api`, `emprestapp-web`, and `emprestapp-mobile`, each with its own Git repository and no shared repository metadata.
+**Reason:** Backend, web, and mobile will be planned and delivered independently, with separate history and operational ownership.
+**Trade-off:** Cross-product changes now require explicit coordination across repositories instead of a single shared commit stream.
+**Impact:** API planning artifacts remain inside `emprestapp-api`, and future frontend/mobile work must not depend on a shared root repository.
+
 ---
 
 ## Active Blockers
 
-No active delivery blockers are currently recorded. Sprint 7 runtime validation completed successfully after fixing production build inputs and parameterizing the Docker host port.
+No active delivery blockers are currently recorded for the API repository. Repository isolation for web and mobile has been completed at the workspace level.
 
 ---
 
@@ -93,6 +100,13 @@ No active delivery blockers are currently recorded. Sprint 7 runtime validation 
 **Problem:** `tsconfig.build.json` referenced only a placeholder test file, and the local environment masked that with existing incremental artifacts.
 **Solution:** Point `tsconfig.build.json` at `src/**/*.ts` and treat container builds as a required clean-build checkpoint.
 **Prevents:** Shipping a Docker setup that only works against cached local state.
+
+### L-006: Repository moves done with elevated file operations can affect Git ownership metadata (2026-04-27)
+
+**Context:** Splitting the workspace required moving the API repository and creating two new repositories.
+**Problem:** Elevated filesystem operations changed directory ownership and briefly triggered Git safe-directory warnings.
+**Solution:** Correct ownership immediately after the move and validate each repository boundary with direct Git commands.
+**Prevents:** A structurally correct split that still fails basic Git operations.
 
 ---
 
@@ -151,6 +165,9 @@ No active delivery blockers are currently recorded. Sprint 7 runtime validation 
 - [x] Complete operational documentation and environment examples
 - [x] Review API error consistency, indexes, and performance-sensitive queries
 - [x] Validate Docker/local environment setup under a running daemon
+- [x] Isolate the API repository into `emprestapp-api`
+- [x] Initialize independent `emprestapp-web` and `emprestapp-mobile` repositories
+- [x] Remove shared Git control from the workspace root
 
 ---
 
@@ -180,6 +197,14 @@ No active delivery blockers are currently recorded. Sprint 7 runtime validation 
 **Why Paused:** Sprint 7 was completed end-to-end, including Docker Compose runtime validation and container health checks.
 **Next Action:** Decide whether to open a stabilization follow-up sprint or prepare commit/release packaging.
 **Verification Snapshot:** build passed, 27 unit suites / 146 tests passed, 6 e2e suites / 35 tests passed, `docker compose config` passed, `docker compose up --build -d` passed, `/health` returned success on `http://localhost:3005/health`.
+
+### H-004: Repository isolation completed (2026-04-27)
+
+**Status:** Ready to continue
+**Stopped At:** Post-migration workspace handoff
+**Why Paused:** The API repository was moved into `emprestapp-api`, `emprestapp-web` and `emprestapp-mobile` were initialized as separate Git repositories, and the shared root `.git` directory was removed.
+**Next Action:** Start frontend planning inside `emprestapp-web` or mobile planning inside `emprestapp-mobile`.
+**Verification Snapshot:** `git status` works in all three repositories, and the workspace root no longer contains `.git`.
 
 ---
 
