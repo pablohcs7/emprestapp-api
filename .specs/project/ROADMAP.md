@@ -1,7 +1,7 @@
 # Roadmap
 
-**Current Milestone:** Foundation and domain specification
-**Status:** In Progress
+**Current Milestone:** MVP backend release readiness completed
+**Status:** Completed
 
 ---
 
@@ -12,18 +12,18 @@
 
 ### Features
 
-**Product Specification** - PLANNED
+**Product Specification** - COMPLETED
 
 - Consolidate vision, target users, problem statement, scope, and constraints
 - Define success criteria for the MVP
 - Capture explicit out-of-scope boundaries
 
-**Glossary and Ubiquitous Language** - IN PROGRESS
+**Glossary and Ubiquitous Language** - COMPLETED
 
 - Standardize terms such as loan, payment, overdue, balance, installment, and contact
 - Remove ambiguity between UI wording and domain wording
 
-**Assumptions and Open Questions** - IN PROGRESS
+**Assumptions and Open Questions** - COMPLETED
 
 - Capture incomplete business rules before implementation
 - Separate confirmed rules from proposals
@@ -38,19 +38,19 @@
 
 ### Features
 
-**Core Entities and Relationships** - PLANNED
+**Core Entities and Relationships** - COMPLETED
 
 - Define `User`, `Contact`, `Loan`, and `Payment`
 - Document ownership, references, and lifecycle rules
 - Clarify invariants and historical preservation rules
 
-**Loan Lifecycle and Status Engine** - PLANNED
+**Loan Lifecycle and Status Engine** - COMPLETED
 
 - Define `open`, `paid`, and `overdue` states
 - Specify status derivation rules and transitions
 - Define how due dates, payments, and settlement affect status
 
-**Financial Calculation Rules** - PLANNED
+**Financial Calculation Rules** - COMPLETED
 
 - Define principal, optional interest, and interest modes
 - Define deterministic remaining balance calculations
@@ -65,31 +65,31 @@
 
 ### Features
 
-**Authentication** - PLANNED
+**Authentication** - COMPLETED
 
 - Registration, login, token refresh, and secure password handling
 - Account ownership boundaries
 - Data export and deletion flows for LGPD alignment
 
-**Contacts Management** - PLANNED
+**Contacts Management** - COMPLETED
 
 - Create, update, list, and archive contacts
 - Link contacts to one or more loans
 - Support loan tracking even when contact data changes
 
-**Loans Management** - PLANNED
+**Loans Management** - COMPLETED
 
 - Create, edit, view, and list loans
 - Support optional interest and optional installments
 - Surface current balance, due date, and status
 
-**Payments Management** - PLANNED
+**Payments Management** - COMPLETED
 
 - Register partial and full payments
 - Preserve immutable payment history
 - Recalculate loan balance and status after each payment
 
-**Dashboard and History** - PLANNED
+**Dashboard and History** - COMPLETED
 
 - Summarize outstanding, overdue, and paid loans
 - Filter historical records
@@ -104,13 +104,13 @@
 
 ### Features
 
-**API Contracts** - PLANNED
+**API Contracts** - COMPLETED
 
 - Define REST endpoints, DTOs, validations, and error semantics
 - Apply the standard response envelope consistently
 - Align authentication and domain endpoints
 
-**Mongo Data Model** - PLANNED
+**Mongo Data Model** - COMPLETED
 
 - Define schemas, indexes, and validation boundaries
 - Map audit/history requirements into persistence choices
@@ -125,13 +125,13 @@
 
 ### Features
 
-**Execution Backlog** - PLANNED
+**Execution Backlog** - COMPLETED
 
 - Break approved specs into atomic tasks with verification gates
 - Sequence dependencies across auth, contacts, loans, payments, and dashboard
 - Track implementation progress without spec drift
 
-**Backend Implementation** - PLANNED
+**Backend Implementation** - COMPLETED
 
 - Implement NestJS modules under `src/modules`
 - Add unit and e2e coverage
@@ -145,10 +145,21 @@ Operational execution is tracked in:
 
 Current sprint posture:
 
-- Sprint 0: IN PROGRESS
-- Sprint 1: READY
-- Sprint 2: READY
-- Sprint 3+: BLOCKED until remaining domain and contract gaps are closed
+- Sprint 0: COMPLETED
+- Sprint 1: COMPLETED
+- Sprint 2: COMPLETED
+- Sprint 3: COMPLETED
+- Sprint 4: COMPLETED
+- Sprint 5: COMPLETED
+- Sprint 6: COMPLETED
+- Sprint 7: COMPLETED
+
+---
+
+## Immediate Focus
+
+- Prepare commit/release packaging for the validated MVP backend
+- Decide whether to open a new post-MVP stabilization or delivery stream
 
 ---
 

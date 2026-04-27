@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { buildMongoConnectionOptions } from './common/database/mongoose.helpers';
 import { AppConfig } from './config/config.types';
 import { RuntimeConfigModule } from './config/runtime-config.module';
+import { HealthController } from './health.controller';
 import { AuthModule } from './modules/auth/auth.module';
 import { ContactsModule } from './modules/contacts/contacts.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
@@ -13,6 +14,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
+  controllers: [HealthController],
   imports: [
     RuntimeConfigModule,
     MongooseModule.forRootAsync({

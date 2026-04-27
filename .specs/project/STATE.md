@@ -1,7 +1,7 @@
 # State
 
-**Last Updated:** 2026-04-24T22:10:00-03:00
-**Current Work:** Sprint 6 completed - dashboard and compliance implemented and verified
+**Last Updated:** 2026-04-27T11:45:00-03:00
+**Current Work:** Sprint 7 completed - local operational artifacts, release gate, and Docker Compose validation passed
 
 ---
 
@@ -53,12 +53,7 @@
 
 ## Active Blockers
 
-### B-001: Financial formulas and contract details still need formalization
-
-**Discovered:** 2026-04-15
-**Impact:** High. Core business-policy decisions are now confirmed, but loan calculations, installment generation details, API payload shapes, and persistence details still need exact specification before safe implementation of financial modules.
-**Workaround:** Use the confirmed assumptions register as the policy source and convert it into domain, API, and data-model specs.
-**Resolution:** Produce formal specs for entities, state transitions, calculation formulas in cents, API contracts, and Mongo structures.
+No active delivery blockers are currently recorded. Sprint 7 runtime validation completed successfully after fixing production build inputs and parameterizing the Docker host port.
 
 ---
 
@@ -77,6 +72,27 @@
 **Problem:** Chat context becomes expensive and brittle once planning spans many phases.
 **Solution:** Persist all critical planning artifacts in `.specs/` and pause implementation only after the next executable step is clearly documented.
 **Prevents:** Losing planning continuity when resuming from a new session.
+
+### L-003: Roadmap drift must be corrected after major implementation waves (2026-04-27)
+
+**Context:** `STATE.md` reflected Sprint 6 completion, but `ROADMAP.md` still described the project as if specification work were the current phase.
+**Problem:** Resume decisions become noisy when project memory and planning artifacts disagree about delivery stage.
+**Solution:** Revalidate the executable state and update roadmap/status artifacts immediately after each major sprint checkpoint.
+**Prevents:** Starting the wrong backlog slice or re-opening already resolved planning work.
+
+### L-004: Release-readiness needs an operational smoke endpoint, not only tests (2026-04-27)
+
+**Context:** Unit and e2e suites already passed before Sprint 7 work started.
+**Problem:** That alone was not enough to validate runtime wiring from local tooling or container health checks.
+**Solution:** Add a lightweight `/health` endpoint and document it as the standard smoke check for local and Docker flows.
+**Prevents:** Ambiguous runtime validation during MVP handoff.
+
+### L-005: Container builds expose config drift that incremental local builds may hide (2026-04-27)
+
+**Context:** `docker compose up --build` failed on the first attempt even though `npm run build` had passed locally.
+**Problem:** `tsconfig.build.json` referenced only a placeholder test file, and the local environment masked that with existing incremental artifacts.
+**Solution:** Point `tsconfig.build.json` at `src/**/*.ts` and treat container builds as a required clean-build checkpoint.
+**Prevents:** Shipping a Docker setup that only works against cached local state.
 
 ---
 
@@ -126,7 +142,15 @@
 - [x] Execute `D1` from `.specs/features/dashboard-compliance/tasks.md`
 - [x] Execute `D2`, `D3`, `D4`, and `D5` from `.specs/features/dashboard-compliance/tasks.md`
 - [x] Execute `D6` from `.specs/features/dashboard-compliance/tasks.md`
-- [ ] Start Sprint 7 stabilization and release readiness
+- [x] Revalidate current codebase with build, unit, and e2e suites
+- [x] Start Sprint 7 stabilization and release readiness
+- [x] Define the executable Sprint 7 backlog from `.specs/project/API-SPRINTS.md`
+- [x] Add `.env.example` and `.env` with temporary MVP-only values
+- [x] Add `Dockerfile`, `.dockerignore`, and `docker-compose.yml`
+- [x] Add operational health endpoint and coverage
+- [x] Complete operational documentation and environment examples
+- [x] Review API error consistency, indexes, and performance-sensitive queries
+- [x] Validate Docker/local environment setup under a running daemon
 
 ---
 
@@ -140,6 +164,22 @@
 **Next Action:** Resume from the stabilization/release-readiness backlog and start Sprint 7.
 **Implementation Readiness:** Sprint 1 through Sprint 6 are implemented and verified locally; Sprint 7 is the next planned slice.
 - [x] Generate execution backlogs for contacts, loans, payments, and dashboard/compliance
+
+### H-002: Resume review and full-suite revalidation (2026-04-27)
+
+**Status:** Ready to continue
+**Stopped At:** Sprint 7 planning entry point, after context reconciliation
+**Why Paused:** Reviewed repository state, confirmed clean worktree, and revalidated the implementation with `npm run build`, `npm run test -- --runInBand`, and `npm run test:e2e -- --runInBand`.
+**Next Action:** Convert Sprint 7 planned scope into an executable backlog and start with the highest-signal stabilization task.
+**Verification Snapshot:** 27 unit suites / 146 tests passed, 6 e2e suites / 34 tests passed, build passed.
+
+### H-003: Sprint 7 operational package implemented (2026-04-27)
+
+**Status:** Ready to continue
+**Stopped At:** Post-Sprint-7 handoff point
+**Why Paused:** Sprint 7 was completed end-to-end, including Docker Compose runtime validation and container health checks.
+**Next Action:** Decide whether to open a stabilization follow-up sprint or prepare commit/release packaging.
+**Verification Snapshot:** build passed, 27 unit suites / 146 tests passed, 6 e2e suites / 35 tests passed, `docker compose config` passed, `docker compose up --build -d` passed, `/health` returned success on `http://localhost:3005/health`.
 
 ---
 

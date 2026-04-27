@@ -58,4 +58,17 @@ describe('App bootstrap (e2e)', () => {
       },
     });
   });
+
+  it('returns a health payload through the standard envelope', async () => {
+    const response = await request(app.getHttpServer()).get('/health');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      success: true,
+      data: {
+        status: 'ok',
+      },
+      error: null,
+    });
+  });
 });
