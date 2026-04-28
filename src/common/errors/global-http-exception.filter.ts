@@ -7,13 +7,21 @@ import {
 } from '@nestjs/common';
 
 import { ApiErrorPayload, ApiResponseEnvelope } from '../http/api-envelope.interceptor';
+import {
+  logHttpException,
+  type ObservableRequest,
+  type ObservableResponse,
+} from '../http/http-observability';
 
 @Catch()
 export class GlobalHttpExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
-    const response = host.switchToHttp().getResponse();
+    const request = host.switchToHttp().getRequest<ObservableRequest>();
+    const response = host.switchToHttp().getResponse<ObservableResponse>();
     const { statusCode, body } = mapExceptionToEnvelope(exception);
 
+    response.status(statusCode);
+    logHttpException(request, response, body.error ?? unknownHttpError(), toError(exception));
     response.status(statusCode).json(body);
   }
 }
@@ -57,6 +65,12 @@ const mapExceptionToEnvelope = (
   };
 };
 
+const unknownHttpError = (): ApiErrorPayload => ({
+  code: 'INTERNAL_SERVER_ERROR',
+  message: 'Internal server error',
+  details: null,
+});
+
 const extractMessage = (error: unknown, fallback: string): string => {
   if (typeof error === 'string') {
     return error;
@@ -97,3 +111,6 @@ const isErrorBody = (
   error: unknown,
 ): error is { message?: string | string[]; details?: unknown; code?: string } =>
   typeof error === 'object' && error !== null;
+
+const toError = (exception: unknown): Error | undefined =>
+  exception instanceof Error ? exception : undefined;

@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { GlobalHttpExceptionFilter } from './common/errors/global-http-exception.filter';
 import { ApiEnvelopeInterceptor } from './common/http/api-envelope.interceptor';
+import { attachHttpObservability } from './common/http/http-observability';
 import { AppConfig } from './config/config.types';
 
 export const configureApp = (app: INestApplication): void => {
@@ -26,6 +27,7 @@ export const configureApp = (app: INestApplication): void => {
   };
 
   app.enableCors(corsOptions);
+  app.use(attachHttpObservability);
 
   app.useGlobalPipes(
     new ValidationPipe({

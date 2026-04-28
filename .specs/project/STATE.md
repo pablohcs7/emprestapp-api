@@ -1,7 +1,7 @@
 # State
 
-**Last Updated:** 2026-04-27T12:05:00-03:00
-**Current Work:** API repository isolated into `emprestapp-api`; web and mobile repositories initialized independently
+**Last Updated:** 2026-04-27T12:45:00-03:00
+**Current Work:** API repository isolated into `emprestapp-api`; HTTP observability logs added for structured request tracing
 
 ---
 
@@ -114,6 +114,7 @@ No active delivery blockers are currently recorded for the API repository. Repos
 
 | # | Description | Date | Commit | Status |
 | --- | --- | --- | --- | --- |
+| 001 | Add structured HTTP observability logs with request correlation on the API | 2026-04-27 | uncommitted | Done |
 
 ---
 
