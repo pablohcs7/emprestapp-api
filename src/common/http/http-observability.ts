@@ -47,7 +47,7 @@ export type ObservableRequest = {
 
 export type ObservableResponse = {
   json: (body: unknown) => void;
-  locals: {
+  locals?: {
     httpError?: HttpErrorContext;
   };
   on: (event: 'finish', listener: () => void) => void;
@@ -98,8 +98,8 @@ export function attachHttpObservability(
       contentLength: response.getHeader('content-length') ?? null,
       userId: user?.sub ?? null,
       userEmail: user?.email ?? null,
-      errorCode: response.locals.httpError?.code ?? null,
-      errorMessage: response.locals.httpError?.message ?? null,
+      errorCode: response.locals?.httpError?.code ?? null,
+      errorMessage: response.locals?.httpError?.message ?? null,
     };
 
     logHttpAccess(response.statusCode, baseLog);
@@ -114,6 +114,7 @@ export function logHttpException(
   payload: HttpErrorContext,
   exception?: Error,
 ): void {
+  response.locals ??= {};
   response.locals.httpError = payload;
 
   const requestId = request.requestContext?.requestId ?? null;

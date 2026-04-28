@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
@@ -71,11 +71,23 @@ export class AuthTokenService {
   async verifyAccessToken(token: string): Promise<AuthTokenPayload> {
     const authConfig = this.configService.getOrThrow<AppConfig['auth']>('auth');
 
-    return Promise.resolve(
-      this.jwtService.verify<AuthTokenPayload>(token, {
-        secret: authConfig.accessToken.secret,
-      }),
-    );
+    try {
+      return Promise.resolve(
+        this.jwtService.verify<AuthTokenPayload>(token, {
+          secret: authConfig.accessToken.secret,
+        }),
+      );
+    } catch (error) {
+      if (error instanceof Error && error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Expired access token');
+      }
+
+      if (error instanceof Error && error.name === 'JsonWebTokenError') {
+        throw new UnauthorizedException('Invalid access token');
+      }
+
+      throw error;
+    }
   }
 
   async verifyRefreshToken(token: string): Promise<AuthTokenPayload> {

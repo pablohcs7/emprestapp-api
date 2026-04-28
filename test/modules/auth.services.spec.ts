@@ -1,3 +1,4 @@
+import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { AppConfig } from '../../src/config/config.types';
@@ -69,6 +70,35 @@ describe('auth services', () => {
     );
     await expect(service.verifyRefreshToken(tokens.refreshToken)).resolves.toMatchObject(
       payload,
+    );
+  });
+
+  it('maps expired access tokens to unauthorized errors', async () => {
+    const service = new AuthTokenService(createConfigService(authConfig));
+    const payload: AuthTokenPayload = {
+      sub: 'usr_1',
+      email: 'jane@example.com',
+    };
+    const tokens = await service.issueSessionTokens(payload);
+
+    jest.setSystemTime(new Date('2026-04-23T15:16:00.000Z'));
+
+    await expect(service.verifyAccessToken(tokens.accessToken)).rejects.toThrow(
+      UnauthorizedException,
+    );
+    await expect(service.verifyAccessToken(tokens.accessToken)).rejects.toThrow(
+      'Expired access token',
+    );
+  });
+
+  it('maps malformed access tokens to unauthorized errors', async () => {
+    const service = new AuthTokenService(createConfigService(authConfig));
+
+    await expect(service.verifyAccessToken('not-a-jwt')).rejects.toThrow(
+      UnauthorizedException,
+    );
+    await expect(service.verifyAccessToken('not-a-jwt')).rejects.toThrow(
+      'Invalid access token',
     );
   });
 
