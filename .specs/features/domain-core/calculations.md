@@ -41,8 +41,8 @@ Define the deterministic financial rules required to compute loan totals, instal
 ### Step 2: Determine interest model
 
 - `none`: no interest is added
-- `simple`: accrual is based on the original principal during the whole period
-- `compound`: accrual is capitalized daily
+- `simple`: accrual is based on the original principal during the whole period, using the contracted monthly rate
+- `compound`: accrual follows fixed-installment financing logic with monthly compounding
 
 ### Step 3: Determine contracted total for schedule generation
 
@@ -61,13 +61,15 @@ The installment schedule is generated from the total contractual amount of the l
 
 - simple interest is calculated over the original principal during the whole period
 - principal does not change the interest base
+- the contracted rate is interpreted as a monthly rate
+- the accrual uses the number of contractual monthly periods
 
 ### Formalization Target
 
 Later API/data specs must define the exact rate representation and formula input units, but the policy is fixed:
 
 - base = original principal
-- accrual basis = calendar days
+- accrual basis = contractual monthly periods
 - no compounding
 
 ---
@@ -76,13 +78,14 @@ Later API/data specs must define the exact rate representation and formula input
 
 ### Policy
 
-- compound interest is capitalized daily
-- capitalization uses calendar days
+- the contracted rate is interpreted as a monthly effective rate
+- installment loans use fixed-installment financing logic compatible with Tabela Price style monthly compounding
+- the schedule may adjust only the last installment by residual cents caused by rounding
 - the contracted rate remains the same before and after due date
 
 ### Formalization Target
 
-Later API/data specs must define the exact daily conversion from the stored rate and the exact rounding boundary per accrual period.
+Later API/data specs must define the exact rounding boundary per accrual period and schedule adjustment strategy.
 
 ---
 
@@ -178,6 +181,6 @@ For the loan:
 These are not open policy questions anymore, but they still require exact technical formalization in the next artifacts:
 
 - exact mathematical formula for `simple` interest in cents
-- exact mathematical formula for daily `compound` capitalization in cents
+- exact mathematical formula for monthly `compound` financing in cents
 - exact representation of `interestRate` in API payloads and persistence
 - exact rounding checkpoints during accrual and schedule generation

@@ -13,9 +13,9 @@ describe('App bootstrap (e2e)', () => {
     process.env.NODE_ENV = 'test';
     process.env.PORT = '3001';
     process.env.MONGODB_URI = 'mongodb://localhost:27017/emprestapp_test';
-    process.env.JWT_ACCESS_SECRET = 'access-secret-value';
+    process.env.JWT_ACCESS_SECRET = '1234567890abcdef1234567890abcdef';
     process.env.JWT_ACCESS_TTL = '15m';
-    process.env.JWT_REFRESH_SECRET = 'refresh-secret-value';
+    process.env.JWT_REFRESH_SECRET = 'abcdef1234567890abcdef1234567890';
     process.env.JWT_REFRESH_TTL = '7d';
     process.env.BCRYPT_SALT_ROUNDS = '10';
 

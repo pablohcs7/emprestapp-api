@@ -21,9 +21,9 @@ describe('Contacts flow (e2e)', () => {
     process.env.NODE_ENV = 'test';
     process.env.PORT = '3003';
     process.env.MONGODB_URI = mongod.getUri('emprestapp_contacts_test');
-    process.env.JWT_ACCESS_SECRET = 'access-secret-value';
+    process.env.JWT_ACCESS_SECRET = '1234567890abcdef1234567890abcdef';
     process.env.JWT_ACCESS_TTL = '15m';
-    process.env.JWT_REFRESH_SECRET = 'refresh-secret-value';
+    process.env.JWT_REFRESH_SECRET = 'abcdef1234567890abcdef1234567890';
     process.env.JWT_REFRESH_TTL = '7d';
     process.env.BCRYPT_SALT_ROUNDS = '10';
 
@@ -109,7 +109,7 @@ describe('Contacts flow (e2e)', () => {
     expect(updateResponse.body.data.phone).toBe('+5511888888888');
   });
 
-  it('returns 403 when a user accesses another user contact', async () => {
+  it('returns 404 when a user accesses another user contact', async () => {
     const owner = await registerUser(app, 'owner@example.com');
     const other = await registerUser(app, 'other@example.com');
     const created = await createContact(app, owner.accessToken, 'Private Contact');
@@ -118,13 +118,13 @@ describe('Contacts flow (e2e)', () => {
       .get(`/contacts/${created.id}`)
       .set('Authorization', `Bearer ${other.accessToken}`);
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(404);
     expect(response.body).toEqual({
       success: false,
       data: null,
       error: {
-        code: 'FORBIDDEN_RESOURCE',
-        message: 'Forbidden resource',
+        code: 'CONTACT_NOT_FOUND',
+        message: 'Contact not found',
         details: null,
       },
     });

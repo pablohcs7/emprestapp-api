@@ -18,9 +18,9 @@ describe('Payments flow (e2e)', () => {
     process.env.NODE_ENV = 'test';
     process.env.PORT = '3005';
     process.env.MONGODB_URI = mongod.getUri('emprestapp_payments_test');
-    process.env.JWT_ACCESS_SECRET = 'access-secret-value';
+    process.env.JWT_ACCESS_SECRET = '1234567890abcdef1234567890abcdef';
     process.env.JWT_ACCESS_TTL = '15m';
-    process.env.JWT_REFRESH_SECRET = 'refresh-secret-value';
+    process.env.JWT_REFRESH_SECRET = 'abcdef1234567890abcdef1234567890';
     process.env.JWT_REFRESH_TTL = '7d';
     process.env.BCRYPT_SALT_ROUNDS = '10';
 
@@ -271,7 +271,7 @@ describe('Payments flow (e2e)', () => {
     });
   });
 
-  it('returns 403 when accessing another user loan payment history', async () => {
+  it('returns 404 when accessing another user loan payment history', async () => {
     const owner = await registerUser(app, 'payments-owner-2@example.com');
     const other = await registerUser(app, 'payments-other@example.com');
     const createdLoan = await createLoan(app, owner.accessToken, {
@@ -284,13 +284,13 @@ describe('Payments flow (e2e)', () => {
       .get(`/loans/${createdLoan.id}/payments?page=1&pageSize=20`)
       .set('Authorization', `Bearer ${other.accessToken}`);
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(404);
     expect(response.body).toEqual({
       success: false,
       data: null,
       error: {
-        code: 'FORBIDDEN_RESOURCE',
-        message: 'Forbidden resource',
+        code: 'LOAN_NOT_FOUND',
+        message: 'Loan not found',
         details: null,
       },
     });

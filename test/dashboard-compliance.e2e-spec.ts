@@ -18,9 +18,9 @@ describe('Dashboard and compliance flow (e2e)', () => {
     process.env.NODE_ENV = 'test';
     process.env.PORT = '3006';
     process.env.MONGODB_URI = mongod.getUri('emprestapp_dashboard_test');
-    process.env.JWT_ACCESS_SECRET = 'access-secret-value';
+    process.env.JWT_ACCESS_SECRET = '1234567890abcdef1234567890abcdef';
     process.env.JWT_ACCESS_TTL = '15m';
-    process.env.JWT_REFRESH_SECRET = 'refresh-secret-value';
+    process.env.JWT_REFRESH_SECRET = 'abcdef1234567890abcdef1234567890';
     process.env.JWT_REFRESH_TTL = '7d';
     process.env.BCRYPT_SALT_ROUNDS = '10';
 
@@ -236,8 +236,16 @@ describe('Dashboard and compliance flow (e2e)', () => {
       .get('/users/me')
       .set('Authorization', `Bearer ${session.accessToken}`);
 
-    expect(profileResponse.status).toBe(200);
-    expect(profileResponse.body.data.status).toBe('deleted');
+    expect(profileResponse.status).toBe(401);
+    expect(profileResponse.body).toEqual({
+      success: false,
+      data: null,
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Invalid or inactive session',
+        details: null,
+      },
+    });
 
     const loginResponse = await request(app.getHttpServer())
       .post('/auth/login')

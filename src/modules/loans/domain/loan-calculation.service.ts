@@ -9,41 +9,16 @@ import {
   LoanStatus,
 } from './loan-calculation.types';
 
-const DAYS_IN_YEAR = 365;
-const CENTS_PER_DOLLAR = 100;
+const PERCENT_SCALE = 1_000_000n;
+const RATE_SCALE = 100n * PERCENT_SCALE;
+const COMPOUND_SCALE = 10_000_000_000_000n;
 
 export class LoanCalculationService {
   calculateContractualTotalCents(input: LoanCalculationInput): number {
-    this.assertPositiveInteger(input.principalAmountCents, 'principalAmountCents');
-    this.assertPositiveInteger(input.installmentCount, 'installmentCount');
-
-    if (input.interestType === 'none') {
-      return input.principalAmountCents;
-    }
-
-    this.assertInterestRate(input.interestRate);
-
-    const dueDate = this.calculateLoanDueDate(
-      input.startDate,
-      input.installmentCount,
+    return this.generateMonthlyInstallments(input).reduce(
+      (total, installment) => total + installment.expectedAmountCents,
+      0,
     );
-
-    const interestCents =
-      input.interestType === 'simple'
-        ? this.calculateSimpleInterestCents(
-            input.principalAmountCents,
-            input.interestRate as number,
-            input.startDate,
-            dueDate,
-          )
-        : this.calculateCompoundInterestCents(
-            input.principalAmountCents,
-            input.interestRate as number,
-            input.startDate,
-            dueDate,
-          );
-
-    return input.principalAmountCents + interestCents;
   }
 
   calculateSimpleInterestCents(
@@ -55,11 +30,13 @@ export class LoanCalculationService {
     this.assertPositiveInteger(principalAmountCents, 'principalAmountCents');
     this.assertInterestRate(interestRate);
 
-    const days = this.calculateCalendarDays(startDate, endDate);
-    const rateAsDecimal = interestRate / CENTS_PER_DOLLAR;
-    const interest = principalAmountCents * rateAsDecimal * (days / DAYS_IN_YEAR);
+    const periods = this.countMonthlyPeriods(startDate, endDate);
 
-    return Math.round(interest);
+    return this.calculateSimpleInterestByPeriods(
+      principalAmountCents,
+      interestRate,
+      periods,
+    );
   }
 
   calculateCompoundInterestCents(
@@ -71,43 +48,34 @@ export class LoanCalculationService {
     this.assertPositiveInteger(principalAmountCents, 'principalAmountCents');
     this.assertInterestRate(interestRate);
 
-    const days = this.calculateCalendarDays(startDate, endDate);
-    const dailyRate = interestRate / CENTS_PER_DOLLAR / DAYS_IN_YEAR;
-    const compounded =
-      principalAmountCents * (Math.pow(1 + dailyRate, days) - 1);
+    const periods = this.countMonthlyPeriods(startDate, endDate);
 
-    return Math.round(compounded);
+    if (periods === 0) {
+      return 0;
+    }
+
+    const contractualTotalCents = this.buildPriceInstallmentAmounts(
+      principalAmountCents,
+      interestRate,
+      periods,
+    ).reduce((total, amount) => total + amount, 0);
+
+    return contractualTotalCents - principalAmountCents;
   }
 
   generateMonthlyInstallments(
     input: LoanCalculationInput,
   ): LoanInstallmentScheduleItem[] {
+    this.assertPositiveInteger(input.principalAmountCents, 'principalAmountCents');
     this.assertPositiveInteger(input.installmentCount, 'installmentCount');
 
-    const contractualTotalCents = this.calculateContractualTotalCents(input);
-    const baseInstallmentCents = Math.floor(
-      contractualTotalCents / input.installmentCount,
-    );
-    const remainderCents =
-      contractualTotalCents - baseInstallmentCents * input.installmentCount;
+    const amounts = this.resolveInstallmentAmounts(input);
 
-    const installments: LoanInstallmentScheduleItem[] = [];
-
-    for (let sequence = 1; sequence <= input.installmentCount; sequence += 1) {
-      const dueDate = this.addMonthsUtc(input.startDate, sequence);
-      const expectedAmountCents =
-        sequence === input.installmentCount
-          ? baseInstallmentCents + remainderCents
-          : baseInstallmentCents;
-
-      installments.push({
-        sequence,
-        dueDate,
-        expectedAmountCents,
-      });
-    }
-
-    return installments;
+    return amounts.map((expectedAmountCents, index) => ({
+      sequence: index + 1,
+      dueDate: this.addMonthsUtc(input.startDate, index + 1),
+      expectedAmountCents,
+    }));
   }
 
   recalculateInstallmentState(
@@ -197,7 +165,9 @@ export class LoanCalculationService {
 
     return {
       status,
-      dueDate: this.cloneDate(sortedInstallments[sortedInstallments.length - 1]!.dueDate),
+      dueDate: this.cloneDate(
+        sortedInstallments[sortedInstallments.length - 1]!.dueDate,
+      ),
       installments,
       totalPaidCents,
       currentBalanceCents,
@@ -226,20 +196,181 @@ export class LoanCalculationService {
     return hasOverdueInstallment ? 'overdue' : 'open';
   }
 
-  private calculateLoanDueDate(startDate: Date, installmentCount: number): Date {
-    return this.addMonthsUtc(startDate, installmentCount);
+  private resolveInstallmentAmounts(input: LoanCalculationInput): number[] {
+    if (input.interestType === 'none') {
+      return this.splitAmountsEvenly(
+        input.principalAmountCents,
+        input.installmentCount,
+      );
+    }
+
+    this.assertInterestRate(input.interestRate);
+
+    if (input.interestType === 'simple') {
+      const interestCents = this.calculateSimpleInterestByPeriods(
+        input.principalAmountCents,
+        input.interestRate as number,
+        input.installmentCount,
+      );
+
+      return this.splitAmountsEvenly(
+        input.principalAmountCents + interestCents,
+        input.installmentCount,
+      );
+    }
+
+    return this.buildPriceInstallmentAmounts(
+      input.principalAmountCents,
+      input.interestRate as number,
+      input.installmentCount,
+    );
   }
 
-  private calculateCalendarDays(startDate: Date, endDate: Date): number {
+  private calculateSimpleInterestByPeriods(
+    principalAmountCents: number,
+    interestRate: number,
+    periods: number,
+  ): number {
+    if (periods === 0) {
+      return 0;
+    }
+
+    const rateUnits = this.toRateUnits(interestRate);
+    const interestCents = this.roundDivide(
+      BigInt(principalAmountCents) * rateUnits * BigInt(periods),
+      RATE_SCALE,
+    );
+
+    return Number(interestCents);
+  }
+
+  private buildPriceInstallmentAmounts(
+    principalAmountCents: number,
+    interestRate: number,
+    periods: number,
+  ): number[] {
+    if (periods === 1) {
+      const interestCents = this.calculateSimpleInterestByPeriods(
+        principalAmountCents,
+        interestRate,
+        1,
+      );
+
+      return [principalAmountCents + interestCents];
+    }
+
+    const rateUnits = this.toRateUnits(interestRate);
+
+    if (rateUnits === 0n) {
+      return this.splitAmountsEvenly(principalAmountCents, periods);
+    }
+
+    const fixedInstallmentCents = this.calculatePriceFixedInstallmentCents(
+      principalAmountCents,
+      rateUnits,
+      periods,
+    );
+    const schedule: number[] = [];
+    let outstandingBalance = BigInt(principalAmountCents);
+
+    for (let sequence = 1; sequence <= periods; sequence += 1) {
+      const interestCents = this.roundDivide(
+        outstandingBalance * rateUnits,
+        RATE_SCALE,
+      );
+
+      if (sequence < periods) {
+        let amortizationCents = BigInt(fixedInstallmentCents) - interestCents;
+
+        if (amortizationCents <= 0n) {
+          throw new Error('interestRate results in a non-amortizing schedule');
+        }
+
+        if (amortizationCents > outstandingBalance) {
+          amortizationCents = outstandingBalance;
+        }
+
+        outstandingBalance -= amortizationCents;
+        schedule.push(fixedInstallmentCents);
+        continue;
+      }
+
+      schedule.push(Number(outstandingBalance + interestCents));
+      outstandingBalance = 0n;
+    }
+
+    return schedule;
+  }
+
+  private calculatePriceFixedInstallmentCents(
+    principalAmountCents: number,
+    rateUnits: bigint,
+    periods: number,
+  ): number {
+    const monthlyFactor = COMPOUND_SCALE + this.roundDivide(
+      rateUnits * COMPOUND_SCALE,
+      RATE_SCALE,
+    );
+    const compoundedFactor = this.powScaled(
+      monthlyFactor,
+      periods,
+      COMPOUND_SCALE,
+    );
+    const numerator =
+      BigInt(principalAmountCents) *
+      rateUnits *
+      compoundedFactor;
+    const denominator =
+      RATE_SCALE * (compoundedFactor - COMPOUND_SCALE);
+
+    return Number(this.roundDivide(numerator, denominator));
+  }
+
+  private splitAmountsEvenly(totalCents: number, periods: number): number[] {
+    const baseAmountCents = Math.floor(totalCents / periods);
+    const remainderCents = totalCents - baseAmountCents * periods;
+
+    return Array.from({ length: periods }, (_, index) =>
+      index === periods - 1 ? baseAmountCents + remainderCents : baseAmountCents,
+    );
+  }
+
+  private countMonthlyPeriods(startDate: Date, endDate: Date): number {
     const normalizedStart = this.cloneDate(startDate);
     const normalizedEnd = this.cloneDate(endDate);
-    const diff = normalizedEnd.getTime() - normalizedStart.getTime();
 
-    if (diff < 0) {
+    if (normalizedEnd.getTime() < normalizedStart.getTime()) {
       throw new Error('endDate must not be before startDate');
     }
 
-    return Math.round(diff / (24 * 60 * 60 * 1000));
+    let periods = 0;
+
+    while (
+      this.addMonthsUtc(normalizedStart, periods + 1).getTime() <=
+      normalizedEnd.getTime()
+    ) {
+      periods += 1;
+    }
+
+    return periods;
+  }
+
+  private powScaled(base: bigint, exponent: number, scale: bigint): bigint {
+    let result = scale;
+
+    for (let index = 0; index < exponent; index += 1) {
+      result = this.roundDivide(result * base, scale);
+    }
+
+    return result;
+  }
+
+  private roundDivide(dividend: bigint, divisor: bigint): bigint {
+    return (dividend + divisor / 2n) / divisor;
+  }
+
+  private toRateUnits(interestRate: number): bigint {
+    return BigInt(Math.round(interestRate * Number(PERCENT_SCALE)));
   }
 
   private addMonthsUtc(date: Date, monthsToAdd: number): Date {

@@ -48,23 +48,56 @@ describe('loan domain calculations', () => {
   it('calculates simple interest in cents using calendar days', () => {
     const interest = service.calculateSimpleInterestCents(
       10000,
-      365,
+      10,
       new Date('2026-01-01T00:00:00.000Z'),
-      new Date('2026-01-03T00:00:00.000Z'),
+      new Date('2026-03-01T00:00:00.000Z'),
     );
 
-    expect(interest).toBe(200);
+    expect(interest).toBe(2000);
   });
 
-  it('calculates daily compound interest in cents', () => {
+  it('calculates compound interest in monthly periods using fixed-installment financing logic', () => {
     const interest = service.calculateCompoundInterestCents(
-      10000,
-      365,
+      129000,
+      1.99,
       new Date('2026-01-01T00:00:00.000Z'),
-      new Date('2026-01-03T00:00:00.000Z'),
+      new Date('2026-05-01T00:00:00.000Z'),
     );
 
-    expect(interest).toBe(201);
+    expect(interest).toBe(6481);
+  });
+
+  it('generates Price-like fixed installments for compound monthly interest with residual adjustment on the last installment', () => {
+    const installments = service.generateMonthlyInstallments({
+      principalAmountCents: 129000,
+      interestType: 'compound',
+      interestRate: 1.99,
+      startDate: new Date('2026-01-01T00:00:00.000Z'),
+      installmentCount: 4,
+    });
+
+    expect(installments).toEqual([
+      {
+        sequence: 1,
+        dueDate: new Date('2026-02-01T00:00:00.000Z'),
+        expectedAmountCents: 33870,
+      },
+      {
+        sequence: 2,
+        dueDate: new Date('2026-03-01T00:00:00.000Z'),
+        expectedAmountCents: 33870,
+      },
+      {
+        sequence: 3,
+        dueDate: new Date('2026-04-01T00:00:00.000Z'),
+        expectedAmountCents: 33870,
+      },
+      {
+        sequence: 4,
+        dueDate: new Date('2026-05-01T00:00:00.000Z'),
+        expectedAmountCents: 33871,
+      },
+    ]);
   });
 
   it('recalculates installment state deterministically from payments and reference date', () => {
