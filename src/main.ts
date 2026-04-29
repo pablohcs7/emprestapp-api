@@ -14,6 +14,9 @@ import {
 import { AppConfig } from './config/config.types';
 
 export const configureApp = (app: INestApplication): void => {
+  const configService = app.get(ConfigService<AppConfig>);
+  const applicationConfig = configService.getOrThrow<AppConfig['app']>('app');
+  const allowedOrigins = new Set(applicationConfig.corsAllowedOrigins);
   const corsOptions: CorsOptions = {
     origin: (origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) => {
       if (!origin) {
@@ -23,14 +26,23 @@ export const configureApp = (app: INestApplication): void => {
 
       const isLocalhostOrigin =
         /^http:\/\/localhost:\d+$/.test(origin) ||
-        /^http:\/\/127\.0\.0\.1:\d+$/.test(origin);
+        /^http:\/\/127\.0\.0\.1:\d+$/.test(origin) ||
+        /^http:\/\/172\.23\.112\.1:\d+$/.test(origin);
+      const isConfiguredOrigin = allowedOrigins.has(origin);
+      const allowOrigin =
+        applicationConfig.nodeEnv === 'production'
+          ? isConfiguredOrigin
+          : isLocalhostOrigin || isConfiguredOrigin;
 
-      callback(isLocalhostOrigin ? null : new Error('Not allowed by CORS'), isLocalhostOrigin);
+      callback(allowOrigin ? null : new Error('Not allowed by CORS'), allowOrigin);
     },
     credentials: true,
   };
 
   app.enableCors(corsOptions);
+  if (applicationConfig.trustProxy) {
+    app.getHttpAdapter().getInstance().set('trust proxy', 1);
+  }
   app.getHttpAdapter().getInstance().disable('x-powered-by');
   app.use(attachSecurityHeaders);
   app.use(attachAuthRateLimit);

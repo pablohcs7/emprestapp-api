@@ -1,7 +1,7 @@
 # State
 
-**Last Updated:** 2026-04-29T10:20:00-03:00
-**Current Work:** public-surface security hardening completed for auth/session validation, resource scoping, DTO input validation, defensive headers, auth throttling, and log redaction
+**Last Updated:** 2026-04-29T17:12:00-03:00
+**Current Work:** production deploy hardening implemented on top of the banking-style loan precision changes; Mongo auth, CORS/proxy controls, health readiness, and container hardening were added and fully revalidated
 
 ---
 
@@ -56,11 +56,25 @@
 **Trade-off:** Cross-product changes now require explicit coordination across repositories instead of a single shared commit stream.
 **Impact:** API planning artifacts remain inside `emprestapp-api`, and future frontend/mobile work must not depend on a shared root repository.
 
+### AD-008: Monthly loan rates must be interpreted with bank-style financing semantics (2026-04-29)
+
+**Decision:** Treat loan `interestRate` as a monthly rate and calculate compound installment schedules using fixed-installment monthly financing logic compatible with Tabela Price style contracts, while keeping simple interest over monthly contractual periods.
+**Reason:** The frontend already communicates the rate as `% a.m.`, and the previous backend engine mixed that with day-based accrual, producing mathematically inconsistent totals relative to common lending practice.
+**Trade-off:** The MVP still does not persist a full amortization ledger by principal versus interest component; it persists only installment totals.
+**Impact:** Loan totals and schedules now align better with common banking conventions, and future support for SAC or other systems should be modeled as an explicit amortization mode.
+
+### AD-009: Local compose and production-facing defaults must assume authenticated Mongo and explicit network trust boundaries (2026-04-29)
+
+**Decision:** Harden deploy configuration to require Mongo authentication in Compose, bind the API to `127.0.0.1` by default for local exposure, run the runtime container as non-root, and move CORS/proxy trust to explicit environment configuration.
+**Reason:** The previous setup was acceptable for local MVP validation but too permissive for internet-facing deployment preparation.
+**Trade-off:** Local setup now needs more environment variables and a Mongo bootstrap script, and production operators must configure origins/proxy intent explicitly.
+**Impact:** `docker-compose.yml`, `.env.example`, `Dockerfile`, `src/main.ts`, `src/config/*`, `security.middleware.ts`, and `health.controller.ts` now reflect a safer deploy baseline.
+
 ---
 
 ## Active Blockers
 
-No active delivery blockers are currently recorded for the API repository. Repository isolation for web and mobile has been completed at the workspace level.
+The local `.env` file in the workspace still contains real secrets and should be rotated and removed from version control history before any public release.
 
 ---
 
@@ -116,6 +130,8 @@ No active delivery blockers are currently recorded for the API repository. Repos
 | --- | --- | --- | --- | --- |
 | 001 | Add structured HTTP observability logs with request correlation on the API | 2026-04-27 | uncommitted | Done |
 | 002 | Harden the public API surface before exposure with auth/session, input, logging, and baseline transport controls | 2026-04-29 | uncommitted | Done |
+| 003 | Correct loan interest precision to monthly bank-style financing semantics | 2026-04-29 | uncommitted | Done |
+| 004 | Harden deploy-time Mongo, proxy, health, and container defaults for public exposure | 2026-04-29 | uncommitted | Done |
 
 ---
 

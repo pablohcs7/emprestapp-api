@@ -5,6 +5,11 @@ export const buildAppConfig = (env: EnvironmentVariables): AppConfig => ({
   app: {
     nodeEnv: env.NODE_ENV,
     port: env.PORT,
+    corsAllowedOrigins: (env.CORS_ALLOWED_ORIGINS ?? '')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean),
+    trustProxy: env.TRUST_PROXY,
   },
   database: {
     mongodbUri: env.MONGODB_URI,

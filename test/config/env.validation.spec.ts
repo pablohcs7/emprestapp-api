@@ -53,11 +53,15 @@ describe('config environment validation', () => {
       JWT_ACCESS_TTL: '15m',
       JWT_REFRESH_SECRET: 'abcdef1234567890abcdef1234567890',
       JWT_REFRESH_TTL: '30d',
+      CORS_ALLOWED_ORIGINS: 'https://app.emprestapp.com',
+      TRUST_PROXY: true,
       BCRYPT_SALT_ROUNDS: 10,
     });
 
     expect(config.app.nodeEnv).toBe('production');
     expect(config.app.port).toBe(8080);
+    expect(config.app.corsAllowedOrigins).toEqual(['https://app.emprestapp.com']);
+    expect(config.app.trustProxy).toBe(true);
     expect(config.database.mongodbUri).toBe('mongodb://mongo:27017/emprestapp');
     expect(config.auth.refreshToken.ttl).toBe('30d');
   });

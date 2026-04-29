@@ -17,8 +17,12 @@ ENV NODE_ENV=production
 
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
+RUN npm cache clean --force
 
-COPY --from=builder /app/dist ./dist
+COPY --from=builder --chown=node:node /app/dist ./dist
+RUN chown -R node:node /app
+
+USER node
 
 EXPOSE 3000
 

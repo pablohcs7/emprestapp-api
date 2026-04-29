@@ -8,6 +8,8 @@ const environmentSchema = Joi.object<EnvironmentVariables>({
     .default('development'),
   PORT: Joi.number().port().default(3000),
   MONGODB_URI: Joi.string().uri({ scheme: ['mongodb', 'mongodb+srv'] }).required(),
+  CORS_ALLOWED_ORIGINS: Joi.string().allow('').optional(),
+  TRUST_PROXY: Joi.boolean().truthy('true').truthy('1').falsy('false').falsy('0').default(false),
   JWT_ACCESS_SECRET: Joi.string().min(16).required(),
   JWT_ACCESS_TTL: Joi.string().min(2).required(),
   JWT_REFRESH_SECRET: Joi.string().min(16).required(),
@@ -33,6 +35,8 @@ export const validateEnvironment = (
     value.JWT_REFRESH_SECRET,
     value.NODE_ENV,
   );
+  assertCorsOrigins(value);
+  assertSecureMongoConfiguration(value);
 
   return value;
 };
@@ -55,6 +59,43 @@ function assertStrongJwtSecret(
   if (weakMarkers.some((marker) => normalized.includes(marker))) {
     throw new Error(
       `Environment validation failed: ${fieldName} must not use placeholder-like values`,
+    );
+  }
+}
+
+function assertCorsOrigins(value: EnvironmentVariables): void {
+  if (value.NODE_ENV !== 'production') {
+    return;
+  }
+
+  const origins = (value.CORS_ALLOWED_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  if (origins.length === 0) {
+    throw new Error(
+      'Environment validation failed: CORS_ALLOWED_ORIGINS must define at least one origin in production',
+    );
+  }
+}
+
+function assertSecureMongoConfiguration(value: EnvironmentVariables): void {
+  if (value.NODE_ENV !== 'production') {
+    return;
+  }
+
+  const normalizedUri = value.MONGODB_URI.toLowerCase();
+
+  if (normalizedUri.includes('mongodb://localhost:27017/')) {
+    throw new Error(
+      'Environment validation failed: production MONGODB_URI must not target localhost without explicit deployment intent',
+    );
+  }
+
+  if (!/[?&]authsource=/i.test(value.MONGODB_URI) && value.MONGODB_URI.includes('@')) {
+    throw new Error(
+      'Environment validation failed: production MONGODB_URI with credentials must define authSource explicitly',
     );
   }
 }
