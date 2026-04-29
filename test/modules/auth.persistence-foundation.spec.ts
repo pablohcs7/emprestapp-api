@@ -94,6 +94,10 @@ describe('auth persistence foundation', () => {
           createdAt: new Date('2026-04-23T00:00:00.000Z'),
         };
       }
+
+      async revokeAllForUser() {
+        return 1;
+      }
     }
 
     const repository = new InMemoryRefreshSessionRepository();
@@ -103,6 +107,7 @@ describe('auth persistence foundation', () => {
     });
     expect(typeof repository.create).toBe('function');
     expect(typeof repository.revoke).toBe('function');
+    expect(typeof repository.revokeAllForUser).toBe('function');
   });
 
   it('creates the user schema with the expected defaults and indexes', () => {

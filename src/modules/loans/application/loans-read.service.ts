@@ -11,7 +11,6 @@ import {
   LoanListView,
 } from '../presentation/loans.types';
 import {
-  ForbiddenLoanResourceError,
   LoanNotFoundError,
 } from './loans.application.service';
 
@@ -62,14 +61,14 @@ export class LoansReadService {
 
   private async resolveMissingScopedLoan(
     loanId: string,
-  ): Promise<LoanNotFoundError | ForbiddenLoanResourceError> {
+  ): Promise<LoanNotFoundError> {
     const loan = await this.loanRepository.findById(loanId);
 
     if (!loan) {
       return new LoanNotFoundError();
     }
 
-    return new ForbiddenLoanResourceError();
+    return new LoanNotFoundError();
   }
 
   private toDetailView(

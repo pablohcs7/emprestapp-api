@@ -8,7 +8,6 @@ export class ContactLifecyclePolicyError extends Error {
   constructor(
     public readonly code:
       | 'CONTACT_NOT_FOUND'
-      | 'FORBIDDEN_RESOURCE'
       | 'CONTACT_HAS_ACTIVE_LOAN'
       | 'CONTACT_HAS_LOAN_HISTORY',
     message: string,
@@ -22,12 +21,6 @@ export class ContactLifecyclePolicyError extends Error {
 export class ContactNotFoundError extends ContactLifecyclePolicyError {
   constructor() {
     super('CONTACT_NOT_FOUND', 'Contact not found');
-  }
-}
-
-export class ForbiddenContactResourceError extends ContactLifecyclePolicyError {
-  constructor() {
-    super('FORBIDDEN_RESOURCE', 'Forbidden resource');
   }
 }
 
@@ -109,12 +102,6 @@ export class ContactLifecyclePolicyService {
     );
 
     if (!contact) {
-      const existingContact = await this.contactRepository.findById(contactId);
-
-      if (existingContact) {
-        throw new ForbiddenContactResourceError();
-      }
-
       throw new ContactNotFoundError();
     }
 

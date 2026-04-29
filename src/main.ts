@@ -7,6 +7,10 @@ import { AppModule } from './app.module';
 import { GlobalHttpExceptionFilter } from './common/errors/global-http-exception.filter';
 import { ApiEnvelopeInterceptor } from './common/http/api-envelope.interceptor';
 import { attachHttpObservability } from './common/http/http-observability';
+import {
+  attachAuthRateLimit,
+  attachSecurityHeaders,
+} from './common/http/security.middleware';
 import { AppConfig } from './config/config.types';
 
 export const configureApp = (app: INestApplication): void => {
@@ -27,6 +31,9 @@ export const configureApp = (app: INestApplication): void => {
   };
 
   app.enableCors(corsOptions);
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
+  app.use(attachSecurityHeaders);
+  app.use(attachAuthRateLimit);
   app.use(attachHttpObservability);
 
   app.useGlobalPipes(

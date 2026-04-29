@@ -5,8 +5,8 @@ import {
   IsIn,
   IsInt,
   IsISO8601,
+  IsMongoId,
   IsOptional,
-  IsString,
   Max,
   Min,
 } from 'class-validator';
@@ -29,12 +29,12 @@ const splitStatuses = (value: unknown): unknown => {
 
 export class ListPaymentsQueryDto {
   @IsOptional()
-  @IsString()
+  @IsMongoId()
   @Transform(({ value }) => normalizeText(value))
   loanId?: string;
 
   @IsOptional()
-  @IsString()
+  @IsMongoId()
   @Transform(({ value }) => normalizeText(value))
   installmentId?: string;
 

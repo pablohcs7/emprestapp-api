@@ -4,8 +4,8 @@ Backend MVP em NestJS para gestao de contatos, emprestimos, pagamentos, dashboar
 
 ## Ambiente
 
-Este repositorio inclui variaveis temporarias para validacao do MVP em `.env`.
-Esses valores nao sao seguros para producao e devem ser trocados depois.
+Nao armazene segredos reais no repositorio ou em arquivos compartilhados.
+Use `.env.example` apenas como referencia estrutural e injete segredos reais fora do versionamento.
 
 Variaveis esperadas:
 
@@ -20,6 +20,10 @@ Variaveis esperadas:
 - `BCRYPT_SALT_ROUNDS`
 
 O arquivo de referencia e `.env.example`.
+Antes de expor a API publicamente, gere e injete segredos fortes e exclusivos para:
+
+- `JWT_ACCESS_SECRET`
+- `JWT_REFRESH_SECRET`
 
 ## Rodando localmente
 
@@ -44,7 +48,8 @@ curl http://localhost:3000/health
 
 ## Rodando com Docker Compose
 
-O compose sobe MongoDB e API com configuracao pronta para validacao do MVP.
+O compose sobe MongoDB e API com configuracao pronta para validacao local do MVP.
+Por seguranca, a porta do Mongo nao e publicada para o host por padrao.
 
 ```bash
 docker compose up --build
@@ -54,7 +59,7 @@ Endpoints uteis:
 
 - API: `http://localhost:${API_HOST_PORT}`
 - Health: `http://localhost:${API_HOST_PORT}/health`
-- MongoDB: `mongodb://localhost:27017/emprestapp_dev`
+- MongoDB: acessivel apenas na rede interna do compose
 
 Para derrubar os containers:
 

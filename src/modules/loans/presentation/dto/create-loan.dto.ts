@@ -4,9 +4,9 @@ import {
   IsIn,
   IsInt,
   IsISO8601,
+  IsMongoId,
   IsNumber,
   IsOptional,
-  IsString,
   Min,
   Validate,
   ValidateNested,
@@ -47,7 +47,7 @@ export class CreateLoanInstallmentPlanDto {
 
 export class CreateLoanDto {
   @IsOptional()
-  @IsString()
+  @IsMongoId()
   contactId?: string;
 
   @Type(() => Number)

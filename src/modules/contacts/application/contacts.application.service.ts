@@ -22,7 +22,7 @@ export interface UpdateContactInput {
 
 export class ContactAccessError extends Error {
   constructor(
-    public readonly code: 'CONTACT_NOT_FOUND' | 'FORBIDDEN_RESOURCE',
+    public readonly code: 'CONTACT_NOT_FOUND',
     message: string,
   ) {
     super(message);
@@ -34,12 +34,6 @@ export class ContactAccessError extends Error {
 export class ContactNotFoundError extends ContactAccessError {
   constructor() {
     super('CONTACT_NOT_FOUND', 'Contact not found');
-  }
-}
-
-export class ForbiddenContactResourceError extends ContactAccessError {
-  constructor() {
-    super('FORBIDDEN_RESOURCE', 'Forbidden resource');
   }
 }
 
@@ -125,7 +119,7 @@ export class ContactsApplicationService {
       return new ContactNotFoundError();
     }
 
-    return new ForbiddenContactResourceError();
+    return new ContactNotFoundError();
   }
 
   private toView(contact: Contact): ContactView {

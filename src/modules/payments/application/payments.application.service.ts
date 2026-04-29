@@ -24,7 +24,6 @@ export class PaymentApplicationError extends Error {
       | 'LOAN_NOT_FOUND'
       | 'INSTALLMENT_NOT_FOUND'
       | 'PAYMENT_NOT_FOUND'
-      | 'FORBIDDEN_RESOURCE'
       | 'INVALID_PAYMENT_AMOUNT'
       | 'INVALID_PAYMENT_SEQUENCE'
       | 'LOAN_CANCELED'
@@ -52,12 +51,6 @@ export class InstallmentNotFoundError extends PaymentApplicationError {
 export class PaymentNotFoundError extends PaymentApplicationError {
   constructor() {
     super('PAYMENT_NOT_FOUND', 'Payment not found');
-  }
-}
-
-export class ForbiddenPaymentResourceError extends PaymentApplicationError {
-  constructor() {
-    super('FORBIDDEN_RESOURCE', 'Forbidden resource');
   }
 }
 
@@ -189,12 +182,6 @@ export class PaymentsApplicationService {
     const loan = await this.loanRepository.findByIdForUser(loanId, userId);
 
     if (!loan) {
-      const existingLoan = await this.loanRepository.findById(loanId);
-
-      if (existingLoan) {
-        throw new ForbiddenPaymentResourceError();
-      }
-
       throw new LoanNotFoundError();
     }
 
@@ -211,14 +198,6 @@ export class PaymentsApplicationService {
     );
 
     if (!installment) {
-      const existingInstallment = await this.installmentRepository.findById(
-        installmentId,
-      );
-
-      if (existingInstallment) {
-        throw new ForbiddenPaymentResourceError();
-      }
-
       throw new InstallmentNotFoundError();
     }
 
@@ -235,12 +214,6 @@ export class PaymentsApplicationService {
     );
 
     if (!payment) {
-      const existingPayment = await this.paymentRepository.findById(paymentId);
-
-      if (existingPayment) {
-        throw new ForbiddenPaymentResourceError();
-      }
-
       throw new PaymentNotFoundError();
     }
 

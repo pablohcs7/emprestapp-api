@@ -1,5 +1,6 @@
 import { UserRepository } from '../../src/modules/users/domain/user.repository';
 import { User } from '../../src/modules/users/domain/user.types';
+import { RefreshSessionRepository } from '../../src/modules/auth/domain/refresh-session.repository';
 import {
   UserNotFoundError,
   UsersProfileComplianceService,
@@ -16,7 +17,11 @@ describe('users profile compliance', () => {
 
   it('returns the authenticated user profile projection', async () => {
     const userRepository = createUserRepositoryMock();
-    const service = new UsersProfileComplianceService(userRepository);
+    const refreshSessionRepository = createRefreshSessionRepositoryMock();
+    const service = new UsersProfileComplianceService(
+      userRepository,
+      refreshSessionRepository,
+    );
     const user = createUser();
 
     userRepository.findById.mockResolvedValue(user);
@@ -33,7 +38,11 @@ describe('users profile compliance', () => {
 
   it('throws when the authenticated user does not exist', async () => {
     const userRepository = createUserRepositoryMock();
-    const service = new UsersProfileComplianceService(userRepository);
+    const refreshSessionRepository = createRefreshSessionRepositoryMock();
+    const service = new UsersProfileComplianceService(
+      userRepository,
+      refreshSessionRepository,
+    );
 
     userRepository.findById.mockResolvedValue(null);
 
@@ -45,7 +54,11 @@ describe('users profile compliance', () => {
 
   it('logically deletes the authenticated account and preserves user data', async () => {
     const userRepository = createUserRepositoryMock();
-    const service = new UsersProfileComplianceService(userRepository);
+    const refreshSessionRepository = createRefreshSessionRepositoryMock();
+    const service = new UsersProfileComplianceService(
+      userRepository,
+      refreshSessionRepository,
+    );
     const user = createUser();
 
     userRepository.findById.mockResolvedValue(user);
@@ -64,11 +77,19 @@ describe('users profile compliance', () => {
         deletedAt: new Date('2026-04-24T10:15:00.000Z'),
       }),
     );
+    expect(refreshSessionRepository.revokeAllForUser).toHaveBeenCalledWith(
+      'usr_1',
+      new Date('2026-04-24T10:15:00.000Z'),
+    );
   });
 
   it('throws when deleting a missing account', async () => {
     const userRepository = createUserRepositoryMock();
-    const service = new UsersProfileComplianceService(userRepository);
+    const refreshSessionRepository = createRefreshSessionRepositoryMock();
+    const service = new UsersProfileComplianceService(
+      userRepository,
+      refreshSessionRepository,
+    );
 
     userRepository.findById.mockResolvedValue(null);
 
@@ -76,6 +97,7 @@ describe('users profile compliance', () => {
 
     await expect(attempt).rejects.toMatchObject({ code: 'USER_NOT_FOUND' });
     expect(userRepository.update).not.toHaveBeenCalled();
+    expect(refreshSessionRepository.revokeAllForUser).not.toHaveBeenCalled();
   });
 });
 
@@ -86,6 +108,14 @@ const createUserRepositoryMock = () =>
     findById: jest.fn(),
     update: jest.fn(),
   }) as unknown as jest.Mocked<UserRepository>;
+
+const createRefreshSessionRepositoryMock = () =>
+  ({
+    create: jest.fn(),
+    findActiveByTokenHash: jest.fn(),
+    revoke: jest.fn(),
+    revokeAllForUser: jest.fn(),
+  }) as unknown as jest.Mocked<RefreshSessionRepository>;
 
 const createUser = (overrides: Partial<User> = {}): User => ({
   id: 'usr_1',

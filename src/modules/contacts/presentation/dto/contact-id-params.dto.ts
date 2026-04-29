@@ -1,7 +1,6 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsMongoId } from 'class-validator';
 
 export class ContactIdParamsDto {
-  @IsString()
-  @IsNotEmpty()
+  @IsMongoId()
   contactId!: string;
 }

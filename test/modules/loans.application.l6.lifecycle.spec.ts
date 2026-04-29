@@ -3,7 +3,6 @@ import { InstallmentRepository } from '../../src/modules/loans/domain/installmen
 import { LoanRepository } from '../../src/modules/loans/domain/loan.repository';
 import { Loan, LoanStatus } from '../../src/modules/loans/domain/loan.types';
 import {
-  ForbiddenLoanResourceError,
   LoanHasPaymentsError,
   LoanLifecyclePolicyService,
   LoanNotFoundError,
@@ -155,7 +154,7 @@ describe('loans application l6 lifecycle', () => {
     expect(loanRepository.cancel).not.toHaveBeenCalled();
   });
 
-  it('throws forbidden when the loan belongs to another user', async () => {
+  it('returns not found when the loan belongs to another user', async () => {
     const loanRepository = createLoanRepositoryMock();
     const installmentRepository = createInstallmentRepositoryMock();
     const loanPaymentReadPort = createLoanPaymentReadPortMock();
@@ -172,10 +171,8 @@ describe('loans application l6 lifecycle', () => {
 
     const attempt = service.deleteLoan('usr_1', 'loan_1');
 
-    await expect(attempt).rejects.toMatchObject({
-      code: 'FORBIDDEN_RESOURCE',
-    });
-    await expect(attempt).rejects.toBeInstanceOf(ForbiddenLoanResourceError);
+    await expect(attempt).rejects.toMatchObject({ code: 'LOAN_NOT_FOUND' });
+    await expect(attempt).rejects.toBeInstanceOf(LoanNotFoundError);
     expect(loanPaymentReadPort.hasPaymentsForLoan).not.toHaveBeenCalled();
     expect(loanRepository.delete).not.toHaveBeenCalled();
   });

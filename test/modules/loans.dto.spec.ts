@@ -13,9 +13,12 @@ import { ListLoansQueryDto } from '../../src/modules/loans/presentation/dto/list
 import { LoanIdParamsDto } from '../../src/modules/loans/presentation/dto/loan-id-params.dto';
 
 describe('loans dto and contracts', () => {
+  const validContactId = '507f1f77bcf86cd799439011';
+  const validLoanId = '507f1f77bcf86cd799439012';
+
   it('validates a create-loan payload with compound interest and installments', async () => {
     const dto = plainToInstance(CreateLoanDto, {
-      contactId: 'ctc_123',
+      contactId: validContactId,
       principalAmountCents: 100000,
       interestType: 'compound',
       interestRate: 2.5,
@@ -69,7 +72,7 @@ describe('loans dto and contracts', () => {
   it('validates list-loan filters from query params', async () => {
     const dto = plainToInstance(ListLoansQueryDto, {
       status: 'open, overdue ,paid',
-      contactId: ' ctc_123 ',
+      contactId: ` ${validContactId} `,
       dueDateFrom: '2026-05-01T00:00:00.000Z',
       dueDateTo: '2026-11-01T00:00:00.000Z',
       periodFrom: '2026-01-01T00:00:00.000Z',
@@ -82,7 +85,7 @@ describe('loans dto and contracts', () => {
 
     expect(errors).toHaveLength(0);
     expect(dto.status).toEqual(['open', 'overdue', 'paid']);
-    expect(dto.contactId).toBe('ctc_123');
+    expect(dto.contactId).toBe(validContactId);
     expect(dto.page).toBe(2);
     expect(dto.pageSize).toBe(15);
   });
@@ -128,15 +131,15 @@ describe('loans dto and contracts', () => {
       pageSize: 20,
       total: 1,
     };
-    const params = plainToInstance(LoanIdParamsDto, { loanId: 'loan_1' });
+    const params = plainToInstance(LoanIdParamsDto, { loanId: validLoanId });
     const linkContact = plainToInstance(LinkLoanContactDto, {
-      contactId: 'ctc_1',
+      contactId: validContactId,
     });
 
     expect(detail.installments).toHaveLength(1);
     expect(detail.paymentSummary.currentBalanceCents).toBe(106500);
     expect(list.items).toHaveLength(1);
-    expect(params.loanId).toBe('loan_1');
-    expect(linkContact.contactId).toBe('ctc_1');
+    expect(params.loanId).toBe(validLoanId);
+    expect(linkContact.contactId).toBe(validContactId);
   });
 });

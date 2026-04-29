@@ -9,7 +9,6 @@ export class LoanLifecyclePolicyError extends Error {
   constructor(
     public readonly code:
       | 'LOAN_NOT_FOUND'
-      | 'FORBIDDEN_RESOURCE'
       | 'LOAN_HAS_PAYMENTS',
     message: string,
   ) {
@@ -22,12 +21,6 @@ export class LoanLifecyclePolicyError extends Error {
 export class LoanNotFoundError extends LoanLifecyclePolicyError {
   constructor() {
     super('LOAN_NOT_FOUND', 'Loan not found');
-  }
-}
-
-export class ForbiddenLoanResourceError extends LoanLifecyclePolicyError {
-  constructor() {
-    super('FORBIDDEN_RESOURCE', 'Forbidden resource');
   }
 }
 
@@ -93,12 +86,6 @@ export class LoanLifecyclePolicyService {
     const loan = await this.loanRepository.findByIdForUser(loanId, userId);
 
     if (!loan) {
-      const existingLoan = await this.loanRepository.findById(loanId);
-
-      if (existingLoan) {
-        throw new ForbiddenLoanResourceError();
-      }
-
       throw new LoanNotFoundError();
     }
 

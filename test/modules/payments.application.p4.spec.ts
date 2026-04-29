@@ -103,7 +103,7 @@ describe('payments application p4', () => {
         loanGlobalFactory: () => createLoan({ userId: 'usr_other' }),
         installmentScopedFactory: () => createInstallment(),
         installmentGlobal: null,
-        expectedCode: 'FORBIDDEN_RESOURCE',
+        expectedCode: 'LOAN_NOT_FOUND',
       },
       {
         label: 'when the installment belongs to another user',
@@ -111,7 +111,7 @@ describe('payments application p4', () => {
         loanGlobal: null,
         installmentScoped: null,
         installmentGlobalFactory: () => createInstallment({ userId: 'usr_other' }),
-        expectedCode: 'FORBIDDEN_RESOURCE',
+        expectedCode: 'INSTALLMENT_NOT_FOUND',
       },
       {
         label: 'when the loan is missing',
@@ -312,7 +312,7 @@ describe('payments application p4', () => {
         label: 'when the payment belongs to another user',
         scopedPayment: null,
         globalPaymentFactory: () => createPayment({ userId: 'usr_other' }),
-        expectedCode: 'FORBIDDEN_RESOURCE',
+        expectedCode: 'PAYMENT_NOT_FOUND',
       },
     ])('$label', async ({ scopedPayment, globalPayment, globalPaymentFactory, expectedCode }) => {
       const { service, paymentRepository, recalculation } = createDependencies();

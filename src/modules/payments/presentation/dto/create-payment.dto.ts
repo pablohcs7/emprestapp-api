@@ -2,6 +2,7 @@ import { Transform, Type } from 'class-transformer';
 import {
   IsInt,
   IsISO8601,
+  IsMongoId,
   IsOptional,
   IsString,
   MaxLength,
@@ -36,10 +37,10 @@ class IsTodayOrPastDateConstraint implements ValidatorConstraintInterface {
 }
 
 export class CreatePaymentDto {
-  @IsString()
+  @IsMongoId()
   loanId!: string;
 
-  @IsString()
+  @IsMongoId()
   installmentId!: string;
 
   @Type(() => Number)

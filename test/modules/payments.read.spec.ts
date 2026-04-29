@@ -1,7 +1,6 @@
 import { LoanRepository } from '../../src/modules/loans/domain/loan.repository';
 import { Loan } from '../../src/modules/loans/domain/loan.types';
 import {
-  ForbiddenPaymentResourceError,
   LoanNotFoundError,
 } from '../../src/modules/payments/application/payments.application.service';
 import { PaymentsReadService } from '../../src/modules/payments/application/payments-read.service';
@@ -78,7 +77,7 @@ describe('payments read service', () => {
     expect(result.items).toHaveLength(2);
   });
 
-  it('rejects loan history when the loan belongs to another user', async () => {
+  it('returns not found for loan history when the loan belongs to another user', async () => {
     const paymentRepository = createPaymentRepositoryMock();
     const loanRepository = createLoanRepositoryMock();
     const service = new PaymentsReadService(paymentRepository, loanRepository);
@@ -91,7 +90,7 @@ describe('payments read service', () => {
       pageSize: 20,
     });
 
-    await expect(attempt).rejects.toBeInstanceOf(ForbiddenPaymentResourceError);
+    await expect(attempt).rejects.toBeInstanceOf(LoanNotFoundError);
     expect(paymentRepository.listByLoanId).not.toHaveBeenCalled();
   });
 

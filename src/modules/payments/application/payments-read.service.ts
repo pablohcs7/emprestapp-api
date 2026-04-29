@@ -6,7 +6,6 @@ import { PaymentRepository } from '../domain/payment.repository';
 import { PaymentListFilters, Payment } from '../domain/payment.types';
 import { PaymentListItemView, PaymentListView } from '../presentation/payments.types';
 import {
-  ForbiddenPaymentResourceError,
   LoanNotFoundError,
 } from './payments.application.service';
 
@@ -62,12 +61,6 @@ export class PaymentsReadService {
     const loan = await this.loanRepository.findByIdForUser(loanId, userId);
 
     if (!loan) {
-      const existingLoan = await this.loanRepository.findById(loanId);
-
-      if (existingLoan) {
-        throw new ForbiddenPaymentResourceError();
-      }
-
       throw new LoanNotFoundError();
     }
 

@@ -15,6 +15,8 @@ import { ReactivateContactParamsDto } from '../../src/modules/contacts/presentat
 import { UpdateContactDto } from '../../src/modules/contacts/presentation/dto/update-contact.dto';
 
 describe('contacts dto and contracts', () => {
+  const validObjectId = '507f1f77bcf86cd799439011';
+
   it('validates and normalizes the create-contact payload', async () => {
     const dto = plainToInstance(CreateContactDto, {
       fullName: '  John Smith  ',
@@ -79,18 +81,18 @@ describe('contacts dto and contracts', () => {
       pageSize: 20,
       total: 1,
     };
-    const contactIdDto = plainToInstance(ContactIdParamsDto, { contactId: 'ctc_1' });
+    const contactIdDto = plainToInstance(ContactIdParamsDto, { contactId: validObjectId });
     const archiveParams = plainToInstance(ArchiveContactParamsDto, {
-      contactId: 'ctc_1',
+      contactId: validObjectId,
     });
     const reactivateParams = plainToInstance(ReactivateContactParamsDto, {
-      contactId: 'ctc_1',
+      contactId: validObjectId,
     });
 
     expect(detail.id).toBe('ctc_1');
     expect(list.items).toHaveLength(1);
-    expect(contactIdDto.contactId).toBe('ctc_1');
-    expect(archiveParams.contactId).toBe('ctc_1');
-    expect(reactivateParams.contactId).toBe('ctc_1');
+    expect(contactIdDto.contactId).toBe(validObjectId);
+    expect(archiveParams.contactId).toBe(validObjectId);
+    expect(reactivateParams.contactId).toBe(validObjectId);
   });
 });

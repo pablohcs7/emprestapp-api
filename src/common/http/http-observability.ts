@@ -93,11 +93,9 @@ export function attachHttpObservability(
       durationMs: Date.now() - startedAtMs,
       ip: request.ip ?? request.socket.remoteAddress ?? null,
       userAgent: request.headers['user-agent'] ?? null,
-      referer: request.headers.referer ?? null,
       origin: request.headers.origin ?? null,
       contentLength: response.getHeader('content-length') ?? null,
       userId: user?.sub ?? null,
-      userEmail: user?.email ?? null,
       errorCode: response.locals?.httpError?.code ?? null,
       errorMessage: response.locals?.httpError?.message ?? null,
     };
@@ -127,9 +125,8 @@ export function logHttpException(
     statusCode: response.statusCode,
     errorCode: payload.code,
     errorMessage: payload.message,
-    details: payload.details,
+    details: sanitizeErrorDetails(payload.details),
     userId: request.user?.sub ?? null,
-    userEmail: request.user?.email ?? null,
   });
 
   if (response.statusCode >= 500) {
@@ -138,6 +135,28 @@ export function logHttpException(
   }
 
   httpErrorLogger.warn(message);
+}
+
+function sanitizeErrorDetails(details: unknown): unknown {
+  if (details == null) {
+    return null;
+  }
+
+  if (typeof details === 'string') {
+    return details.slice(0, 200);
+  }
+
+  if (Array.isArray(details)) {
+    return details
+      .filter((item): item is string => typeof item === 'string')
+      .slice(0, 5);
+  }
+
+  if (typeof details === 'object') {
+    return 'redacted';
+  }
+
+  return null;
 }
 
 function logHttpAccess(statusCode: number, payload: Record<string, unknown>) {

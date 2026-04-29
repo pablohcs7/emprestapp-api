@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  ForbiddenException,
   Get,
   HttpCode,
   NotFoundException,
@@ -20,7 +19,6 @@ import { PaymentIdParamsDto } from './presentation/dto/payment-id-params.dto';
 import { CreatePaymentDto } from './presentation/dto/create-payment.dto';
 import { ListPaymentsQueryDto } from './presentation/dto/list-payments-query.dto';
 import {
-  ForbiddenPaymentResourceError,
   InstallmentNotFoundError,
   InvalidPaymentAmountError,
   InvalidPaymentSequenceError,
@@ -123,13 +121,6 @@ const mapPaymentErrorToHttpException = (error: unknown): Error => {
     return new NotFoundException({
       code: 'PAYMENT_NOT_FOUND',
       message: 'Payment not found',
-    });
-  }
-
-  if (error instanceof ForbiddenPaymentResourceError) {
-    return new ForbiddenException({
-      code: 'FORBIDDEN_RESOURCE',
-      message: 'Forbidden resource',
     });
   }
 

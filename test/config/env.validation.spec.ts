@@ -7,9 +7,9 @@ describe('config environment validation', () => {
       NODE_ENV: 'test',
       PORT: '4000',
       MONGODB_URI: 'mongodb://localhost:27017/emprestapp',
-      JWT_ACCESS_SECRET: 'access-secret-value',
+      JWT_ACCESS_SECRET: 'access-key-value-1234',
       JWT_ACCESS_TTL: '15m',
-      JWT_REFRESH_SECRET: 'refresh-secret-value',
+      JWT_REFRESH_SECRET: 'refresh-key-value-1234',
       JWT_REFRESH_TTL: '7d',
       BCRYPT_SALT_ROUNDS: '12',
     });
@@ -28,14 +28,30 @@ describe('config environment validation', () => {
     ).toThrow(/MONGODB_URI/);
   });
 
+  it('rejects placeholder-like JWT secrets', () => {
+    expect(() =>
+      validateEnvironment({
+        NODE_ENV: 'production',
+        PORT: '3000',
+        MONGODB_URI: 'mongodb://mongo:27017/emprestapp',
+        JWT_ACCESS_SECRET: 'change-me-in-production-please',
+        JWT_ACCESS_TTL: '15m',
+        JWT_REFRESH_SECRET:
+          '0123456789abcdef0123456789abcdef',
+        JWT_REFRESH_TTL: '7d',
+        BCRYPT_SALT_ROUNDS: '10',
+      }),
+    ).toThrow(/JWT_ACCESS_SECRET/);
+  });
+
   it('maps validated variables into the runtime config shape', () => {
     const config = buildAppConfig({
       NODE_ENV: 'production',
       PORT: 8080,
       MONGODB_URI: 'mongodb://mongo:27017/emprestapp',
-      JWT_ACCESS_SECRET: 'access-secret-value',
+      JWT_ACCESS_SECRET: '1234567890abcdef1234567890abcdef',
       JWT_ACCESS_TTL: '15m',
-      JWT_REFRESH_SECRET: 'refresh-secret-value',
+      JWT_REFRESH_SECRET: 'abcdef1234567890abcdef1234567890',
       JWT_REFRESH_TTL: '30d',
       BCRYPT_SALT_ROUNDS: 10,
     });

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { RefreshSessionRepository } from '../../auth/domain/refresh-session.repository';
 import { UserRepository } from '../domain/user.repository';
 import { User } from '../domain/user.types';
 import {
@@ -26,7 +27,10 @@ export class UserNotFoundError extends UserProfileComplianceError {
 
 @Injectable()
 export class UsersProfileComplianceService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly refreshSessionRepository: RefreshSessionRepository,
+  ) {}
 
   async getProfile(userId: string): Promise<UserProfileView> {
     const user = await this.findUserOrThrow(userId);
@@ -43,6 +47,7 @@ export class UsersProfileComplianceService {
       status: 'deleted',
       deletedAt,
     });
+    await this.refreshSessionRepository.revokeAllForUser(user.id, deletedAt);
 
     return {
       status: 'deleted',

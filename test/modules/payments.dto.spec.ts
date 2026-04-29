@@ -12,10 +12,14 @@ import { ListPaymentsQueryDto } from '../../src/modules/payments/presentation/dt
 import { PaymentIdParamsDto } from '../../src/modules/payments/presentation/dto/payment-id-params.dto';
 
 describe('payments dto and contracts', () => {
+  const validLoanId = '507f1f77bcf86cd799439012';
+  const validInstallmentId = '507f1f77bcf86cd799439013';
+  const validPaymentId = '507f1f77bcf86cd799439014';
+
   it('validates and normalizes the create-payment payload', async () => {
     const dto = plainToInstance(CreatePaymentDto, {
-      loanId: 'loan_123',
-      installmentId: 'inst_003',
+      loanId: validLoanId,
+      installmentId: validInstallmentId,
       amountCents: '5000',
       paidAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
       method: ' pix ',
@@ -32,8 +36,8 @@ describe('payments dto and contracts', () => {
 
   it('rejects future paidAt values', async () => {
     const dto = plainToInstance(CreatePaymentDto, {
-      loanId: 'loan_123',
-      installmentId: 'inst_003',
+      loanId: validLoanId,
+      installmentId: validInstallmentId,
       amountCents: 5000,
       paidAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     });
@@ -48,8 +52,8 @@ describe('payments dto and contracts', () => {
 
   it('rejects non-positive payment amounts', async () => {
     const dto = plainToInstance(CreatePaymentDto, {
-      loanId: 'loan_123',
-      installmentId: 'inst_003',
+      loanId: validLoanId,
+      installmentId: validInstallmentId,
       amountCents: 0,
       paidAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     });
@@ -64,8 +68,8 @@ describe('payments dto and contracts', () => {
 
   it('validates list-payment filters and parses status values', async () => {
     const dto = plainToInstance(ListPaymentsQueryDto, {
-      loanId: ' loan_123 ',
-      installmentId: ' inst_003 ',
+      loanId: ` ${validLoanId} `,
+      installmentId: ` ${validInstallmentId} `,
       status: 'active, canceled',
       paidAtFrom: '2026-01-01T00:00:00.000Z',
       paidAtTo: '2026-12-31T00:00:00.000Z',
@@ -76,8 +80,8 @@ describe('payments dto and contracts', () => {
     const errors = await validate(dto);
 
     expect(errors).toHaveLength(0);
-    expect(dto.loanId).toBe('loan_123');
-    expect(dto.installmentId).toBe('inst_003');
+    expect(dto.loanId).toBe(validLoanId);
+    expect(dto.installmentId).toBe(validInstallmentId);
     expect(dto.status).toEqual(['active', 'canceled']);
     expect(dto.page).toBe(2);
     expect(dto.pageSize).toBe(15);
@@ -103,10 +107,10 @@ describe('payments dto and contracts', () => {
       pageSize: 20,
       total: 1,
     };
-    const params = plainToInstance(PaymentIdParamsDto, { paymentId: 'pay_1' });
+    const params = plainToInstance(PaymentIdParamsDto, { paymentId: validPaymentId });
 
     expect(detail.id).toBe('pay_1');
     expect(list.items).toHaveLength(1);
-    expect(params.paymentId).toBe('pay_1');
+    expect(params.paymentId).toBe(validPaymentId);
   });
 });

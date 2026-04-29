@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   HttpCode,
   NotFoundException,
@@ -27,7 +26,6 @@ import {
   ContactHasLoanHistoryError,
   ContactLifecyclePolicyError,
   ContactLifecyclePolicyService,
-  ForbiddenContactResourceError as LifecycleForbiddenContactResourceError,
 } from './application/contact-lifecycle-policy.service';
 import { ArchiveContactParamsDto } from './presentation/dto/archive-contact-params.dto';
 import { ContactIdParamsDto } from './presentation/dto/contact-id-params.dto';
@@ -157,13 +155,10 @@ const mapContactErrorToHttpException = (error: unknown): Error => {
     });
   }
 
-  if (
-    error instanceof ContactAccessError ||
-    error instanceof LifecycleForbiddenContactResourceError
-  ) {
-    return new ForbiddenException({
-      code: 'FORBIDDEN_RESOURCE',
-      message: 'Forbidden resource',
+  if (error instanceof ContactAccessError) {
+    return new NotFoundException({
+      code: 'CONTACT_NOT_FOUND',
+      message: 'Contact not found',
     });
   }
 

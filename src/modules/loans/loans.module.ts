@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { AuthModule } from '../auth/auth.module';
 import { ContactsModule } from '../contacts/contacts.module';
+import { UsersModule } from '../users/users.module';
 import { LoanLifecyclePolicyService } from './application/loan-lifecycle-policy.service';
 import { LoansReadService } from './application/loans-read.service';
 import { LoansApplicationService } from './application/loans.application.service';
@@ -21,6 +22,7 @@ import { LoansController } from './loans.controller';
   imports: [
     forwardRef(() => AuthModule),
     ContactsModule,
+    forwardRef(() => UsersModule),
     MongooseModule.forFeature([
       {
         name: LoanDocument.name,

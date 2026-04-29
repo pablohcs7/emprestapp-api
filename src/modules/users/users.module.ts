@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AuthModule } from '../auth/auth.module';
+import { AuthPersistenceModule } from '../auth/infrastructure/auth-persistence.module';
 import { ContactsModule } from '../contacts/contacts.module';
 import { LoansModule } from '../loans/loans.module';
 import { PaymentsModule } from '../payments/payments.module';
@@ -15,6 +16,7 @@ import { UsersController } from './users.controller';
 @Module({
   imports: [
     forwardRef(() => AuthModule),
+    AuthPersistenceModule,
     forwardRef(() => ContactsModule),
     forwardRef(() => LoansModule),
     forwardRef(() => PaymentsModule),

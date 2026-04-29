@@ -27,5 +27,34 @@ export const validateEnvironment = (
     throw new Error(`Environment validation failed: ${error.message}`);
   }
 
+  assertStrongJwtSecret('JWT_ACCESS_SECRET', value.JWT_ACCESS_SECRET, value.NODE_ENV);
+  assertStrongJwtSecret(
+    'JWT_REFRESH_SECRET',
+    value.JWT_REFRESH_SECRET,
+    value.NODE_ENV,
+  );
+
   return value;
 };
+
+function assertStrongJwtSecret(
+  fieldName: string,
+  value: string,
+  nodeEnv: EnvironmentVariables['NODE_ENV'],
+): void {
+  const normalized = value.trim().toLowerCase();
+  const weakMarkers = ['changeme', 'example', 'placeholder', 'temp', 'secret'];
+  const minLength = nodeEnv === 'production' ? 32 : 16;
+
+  if (value.trim().length < minLength) {
+    throw new Error(
+      `Environment validation failed: ${fieldName} must be at least ${minLength} characters long`,
+    );
+  }
+
+  if (weakMarkers.some((marker) => normalized.includes(marker))) {
+    throw new Error(
+      `Environment validation failed: ${fieldName} must not use placeholder-like values`,
+    );
+  }
+}

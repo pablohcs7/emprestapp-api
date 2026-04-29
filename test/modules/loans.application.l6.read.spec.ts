@@ -3,7 +3,6 @@ import { Installment } from '../../src/modules/loans/domain/installment.types';
 import { LoanRepository } from '../../src/modules/loans/domain/loan.repository';
 import { Loan, LoanListFilters } from '../../src/modules/loans/domain/loan.types';
 import {
-  ForbiddenLoanResourceError,
   LoanNotFoundError,
 } from '../../src/modules/loans/application/loans.application.service';
 import { LoansReadService } from '../../src/modules/loans/application/loans-read.service';
@@ -177,7 +176,7 @@ describe('loans application service L6 read', () => {
     expect(installmentRepository.findByLoanId).not.toHaveBeenCalled();
   });
 
-  it('throws forbidden when the loan exists but belongs to another user', async () => {
+  it('returns not found when the loan exists but belongs to another user', async () => {
     const loanRepository = createLoanRepositoryMock();
     const installmentRepository = createInstallmentRepositoryMock();
 
@@ -192,12 +191,8 @@ describe('loans application service L6 read', () => {
     const service = new LoansReadService(loanRepository, installmentRepository);
     const detailAttempt = service.detail('usr_1', 'loan_1');
 
-    await expect(detailAttempt).rejects.toBeInstanceOf(
-      ForbiddenLoanResourceError,
-    );
-    await expect(detailAttempt).rejects.toMatchObject({
-      code: 'FORBIDDEN_RESOURCE',
-    });
+    await expect(detailAttempt).rejects.toBeInstanceOf(LoanNotFoundError);
+    await expect(detailAttempt).rejects.toMatchObject({ code: 'LOAN_NOT_FOUND' });
     expect(installmentRepository.findByLoanId).not.toHaveBeenCalled();
   });
 });

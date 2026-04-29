@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
 import { LoanCalculationService } from '../loans/domain/loan-calculation.service';
 import { LoansModule } from '../loans/loans.module';
+import { UsersModule } from '../users/users.module';
 import { PaymentRecalculationService } from './application/payment-recalculation.service';
 import { PaymentsApplicationService } from './application/payments.application.service';
 import { PaymentsReadService } from './application/payments-read.service';
@@ -16,6 +17,7 @@ import { PaymentsController } from './payments.controller';
   imports: [
     forwardRef(() => AuthModule),
     LoansModule,
+    forwardRef(() => UsersModule),
     MongooseModule.forFeature([
       {
         name: PaymentDocument.name,

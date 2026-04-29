@@ -1,7 +1,7 @@
 # State
 
-**Last Updated:** 2026-04-27T12:45:00-03:00
-**Current Work:** API repository isolated into `emprestapp-api`; HTTP observability logs added for structured request tracing
+**Last Updated:** 2026-04-29T10:20:00-03:00
+**Current Work:** public-surface security hardening completed for auth/session validation, resource scoping, DTO input validation, defensive headers, auth throttling, and log redaction
 
 ---
 
@@ -115,6 +115,7 @@ No active delivery blockers are currently recorded for the API repository. Repos
 | # | Description | Date | Commit | Status |
 | --- | --- | --- | --- | --- |
 | 001 | Add structured HTTP observability logs with request correlation on the API | 2026-04-27 | uncommitted | Done |
+| 002 | Harden the public API surface before exposure with auth/session, input, logging, and baseline transport controls | 2026-04-29 | uncommitted | Done |
 
 ---
 

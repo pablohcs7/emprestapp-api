@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AuthModule } from '../auth/auth.module';
+import { UsersModule } from '../users/users.module';
 import { ContactLifecyclePolicyService } from './application/contact-lifecycle-policy.service';
 import { ContactsApplicationService } from './application/contacts.application.service';
 import { ContactsController } from './contacts.controller';
@@ -14,6 +15,7 @@ import { ContactDocument, contactSchema } from './infrastructure/persistence/con
 @Module({
   imports: [
     forwardRef(() => AuthModule),
+    forwardRef(() => UsersModule),
     MongooseModule.forFeature([
       {
         name: ContactDocument.name,

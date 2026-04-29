@@ -11,7 +11,6 @@ import { LoanRepository } from '../../src/modules/loans/domain/loan.repository';
 import { Loan, LoanStatus } from '../../src/modules/loans/domain/loan.types';
 import {
   ContactNotFoundError,
-  ForbiddenLoanResourceError,
   LoansApplicationService,
 } from '../../src/modules/loans/application/loans.application.service';
 
@@ -320,8 +319,8 @@ describe('loans application service L5', () => {
         id: 'ctc_1',
         userId: 'usr_other',
       }),
-      expectedError: ForbiddenLoanResourceError,
-      expectedCode: 'FORBIDDEN_RESOURCE',
+      expectedError: ContactNotFoundError,
+      expectedCode: 'CONTACT_NOT_FOUND',
     },
   ])('rejects create %s', async ({ findByIdResultFactory, expectedError, expectedCode }) => {
     const loanRepository = createLoanRepositoryMock();
@@ -436,7 +435,7 @@ describe('loans application service L5', () => {
         id: 'loan_1',
         userId: 'usr_other',
       }),
-      expectedCode: 'FORBIDDEN_RESOURCE',
+      expectedCode: 'LOAN_NOT_FOUND',
     },
   ])('rejects link-contact %s', async ({ findByIdResultFactory, expectedCode }) => {
     const loanRepository = createLoanRepositoryMock();
@@ -476,8 +475,8 @@ describe('loans application service L5', () => {
         id: 'ctc_2',
         userId: 'usr_other',
       }),
-      expectedError: ForbiddenLoanResourceError,
-      expectedCode: 'FORBIDDEN_RESOURCE',
+      expectedError: ContactNotFoundError,
+      expectedCode: 'CONTACT_NOT_FOUND',
     },
   ])('rejects link-contact %s', async ({ findByIdResultFactory, expectedError, expectedCode }) => {
     const loanRepository = createLoanRepositoryMock();

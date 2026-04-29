@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   HttpCode,
   NotFoundException,
@@ -19,12 +18,10 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AuthTokenPayload } from '../auth/token.service';
 import {
   ContactNotFoundError as CreateContactNotFoundError,
-  ForbiddenLoanResourceError as CreateForbiddenLoanResourceError,
   LoanNotFoundError as CreateLoanNotFoundError,
   LoansApplicationService,
 } from './application/loans.application.service';
 import {
-  ForbiddenLoanResourceError as LifecycleForbiddenLoanResourceError,
   LoanHasPaymentsError,
   LoanLifecyclePolicyService,
   LoanNotFoundError as LifecycleLoanNotFoundError,
@@ -147,16 +144,6 @@ const mapLoanErrorToHttpException = (error: unknown): Error => {
     return new NotFoundException({
       code: 'CONTACT_NOT_FOUND',
       message: 'Contact not found',
-    });
-  }
-
-  if (
-    error instanceof CreateForbiddenLoanResourceError ||
-    error instanceof LifecycleForbiddenLoanResourceError
-  ) {
-    return new ForbiddenException({
-      code: 'FORBIDDEN_RESOURCE',
-      message: 'Forbidden resource',
     });
   }
 

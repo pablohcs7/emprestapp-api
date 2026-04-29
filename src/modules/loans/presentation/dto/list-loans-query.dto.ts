@@ -5,8 +5,8 @@ import {
   IsIn,
   IsInt,
   IsISO8601,
+  IsMongoId,
   IsOptional,
-  IsString,
   Max,
   Min,
 } from 'class-validator';
@@ -36,7 +36,7 @@ export class ListLoansQueryDto {
   status?: LoanStatus[];
 
   @IsOptional()
-  @IsString()
+  @IsMongoId()
   @Transform(({ value }) => normalizeText(value))
   contactId?: string;
 

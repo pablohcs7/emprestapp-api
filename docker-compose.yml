@@ -3,8 +3,6 @@ services:
     image: mongo:8
     container_name: emprestapp-mongodb
     restart: unless-stopped
-    ports:
-      - '27017:27017'
     volumes:
       - mongodb_data:/data/db
     healthcheck:

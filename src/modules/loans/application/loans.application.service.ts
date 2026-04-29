@@ -32,8 +32,7 @@ export class LoanApplicationError extends Error {
   constructor(
     public readonly code:
       | 'LOAN_NOT_FOUND'
-      | 'CONTACT_NOT_FOUND'
-      | 'FORBIDDEN_RESOURCE',
+      | 'CONTACT_NOT_FOUND',
     message: string,
   ) {
     super(message);
@@ -51,12 +50,6 @@ export class LoanNotFoundError extends LoanApplicationError {
 export class ContactNotFoundError extends LoanApplicationError {
   constructor() {
     super('CONTACT_NOT_FOUND', 'Contact not found');
-  }
-}
-
-export class ForbiddenLoanResourceError extends LoanApplicationError {
-  constructor() {
-    super('FORBIDDEN_RESOURCE', 'Forbidden resource');
   }
 }
 
@@ -154,12 +147,6 @@ export class LoansApplicationService {
     const loan = await this.loanRepository.findByIdForUser(loanId, userId);
 
     if (!loan) {
-      const existingLoan = await this.loanRepository.findById(loanId);
-
-      if (existingLoan) {
-        throw new ForbiddenLoanResourceError();
-      }
-
       throw new LoanNotFoundError();
     }
 
@@ -173,12 +160,6 @@ export class LoansApplicationService {
     const contact = await this.contactRepository.findByIdForUser(contactId, userId);
 
     if (!contact) {
-      const existingContact = await this.contactRepository.findById(contactId);
-
-      if (existingContact) {
-        throw new ForbiddenLoanResourceError();
-      }
-
       throw new ContactNotFoundError();
     }
 

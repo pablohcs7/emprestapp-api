@@ -68,4 +68,16 @@ export class MongooseRefreshSessionRepository
 
     return document ? toRefreshSession(document as RefreshSessionModelDocument) : null;
   }
+
+  async revokeAllForUser(userId: string, revokedAt: Date): Promise<number> {
+    const result = await this.refreshSessionModel.updateMany(
+      {
+        userId: new Types.ObjectId(userId),
+        revokedAt: null,
+      },
+      { revokedAt },
+    );
+
+    return result.modifiedCount ?? 0;
+  }
 }
