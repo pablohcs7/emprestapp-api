@@ -13,6 +13,7 @@ Variaveis esperadas:
 - `PORT`
 - `API_HOST_PORT`
 - `API_BIND_ADDRESS`
+- `MONGODB_DATABASE`
 - `MONGODB_URI`
 - `CORS_ALLOWED_ORIGINS`
 - `TRUST_PROXY`
@@ -37,8 +38,17 @@ Antes de expor a API publicamente, gere e injete segredos fortes e exclusivos pa
 Em producao:
 
 - use `MONGODB_URI` com credenciais reais e `authSource` explicito
+- use `MONGODB_DATABASE` para definir o banco de aplicacao sem hardcode no bootstrap do Mongo
 - defina `CORS_ALLOWED_ORIGINS` com as origins publicas exatas do frontend
 - habilite `TRUST_PROXY=true` apenas quando houver proxy reverso confiavel na frente da API
+
+### Modelo de autenticacao MongoDB
+
+- `MONGODB_DATABASE` define o banco da aplicacao, por exemplo `emprestapp_dev` em desenvolvimento e `emprestapp` em producao
+- `MONGODB_URI` deve usar `authSource=admin` quando houver credenciais, por exemplo `mongodb://emprestapp_app:...@mongodb:27017/emprestapp?authSource=admin`
+- o bootstrap do Mongo cria o usuario de aplicacao no banco `admin`
+- esse usuario recebe apenas `readWrite` no banco definido em `MONGODB_DATABASE`
+- nao publique a porta `27017` do MongoDB em producao; mantenha o banco acessivel apenas por rede privada ou pela rede interna do Docker
 
 ## Rodando localmente
 
@@ -65,8 +75,10 @@ curl http://localhost:3000/health
 
 O compose sobe MongoDB e API com configuracao pronta para validacao local do MVP.
 Por seguranca, a porta do Mongo nao e publicada para o host por padrao.
-O banco sobe com autenticacao obrigatoria: um usuario root apenas para bootstrap/admin e um usuario de aplicacao com `readWrite` no banco `emprestapp_dev`.
+O banco sobe com autenticacao obrigatoria: um usuario root apenas para bootstrap/admin e um usuario de aplicacao criado no banco `admin`, com `readWrite` apenas no banco definido em `MONGODB_DATABASE`.
 Por padrao, a API tambem fica bindada em `127.0.0.1`, evitando exposicao involuntaria em todas as interfaces do host.
+
+Localmente, o compose usa `.env` por padrao. Em VPS, defina `APP_ENV_FILE=/srv/emprestapp-api/env/.env` para carregar segredos fora do repositorio.
 
 ```bash
 docker compose up --build

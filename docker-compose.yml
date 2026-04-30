@@ -4,11 +4,14 @@ services:
     container_name: emprestapp-mongodb
     restart: unless-stopped
     env_file:
-      - .env
+      - ${APP_ENV_FILE:-.env}
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: emprestapp_dev
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE}
+      MONGODB_DATABASE: ${MONGODB_DATABASE}
+      MONGODB_APP_USERNAME: ${MONGODB_APP_USERNAME}
+      MONGODB_APP_PASSWORD: ${MONGODB_APP_PASSWORD}
     volumes:
       - mongodb_data:/data/db
       - ./docker/mongo/init:/docker-entrypoint-initdb.d:ro
@@ -38,9 +41,10 @@ services:
     container_name: emprestapp-api
     restart: unless-stopped
     env_file:
-      - .env
+      - ${APP_ENV_FILE:-.env}
     environment:
-      MONGODB_URI: mongodb://${MONGODB_APP_USERNAME}:${MONGODB_APP_PASSWORD}@mongodb:27017/emprestapp_dev?authSource=admin
+      PORT: 3000
+      MONGODB_URI: ${MONGODB_URI}
     ports:
       - '${API_BIND_ADDRESS:-127.0.0.1}:${API_HOST_PORT:-3000}:3000'
     read_only: true

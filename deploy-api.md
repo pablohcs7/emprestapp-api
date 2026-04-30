@@ -66,6 +66,7 @@ Create `/srv/emprestapp-api/env/.env` with production values for:
 - `PORT=3000`
 - `API_HOST_PORT=3000`
 - `API_BIND_ADDRESS=127.0.0.1`
+- `MONGODB_DATABASE=emprestapp`
 - `MONGODB_URI`
 - `CORS_ALLOWED_ORIGINS`
 - `TRUST_PROXY=true`
@@ -82,18 +83,25 @@ If MongoDB runs through the provided compose setup, also define:
 - `MONGODB_APP_USERNAME`
 - `MONGODB_APP_PASSWORD`
 
+Recommended production Mongo values:
+
+- `MONGODB_DATABASE=emprestapp`
+- `MONGODB_URI=mongodb://emprestapp_app:replace-with-a-secure-db-password@mongodb:27017/emprestapp?authSource=admin`
+
 Rules:
 
 - never reuse local example secrets
 - keep JWT secrets long and unique
 - keep `CORS_ALLOWED_ORIGINS` exact
+- keep `/srv/emprestapp-api/env/.env` outside the repository clone
+- do not publish MongoDB port `27017`
 
 ## 4. Deploy with Docker Compose
 
 Inside `/srv/emprestapp-api/app`:
 
 ```bash
-docker compose --env-file /srv/emprestapp-api/env/.env up -d --build
+APP_ENV_FILE=/srv/emprestapp-api/env/.env docker compose --env-file /srv/emprestapp-api/env/.env up -d --build
 ```
 
 Useful commands:
@@ -169,3 +177,4 @@ Always verify `/health` and auth after rollback.
 - do not keep `.env` in the repo clone
 - monitor disk growth from logs and volumes
 - keep TLS renewal automated
+- if using the bundled MongoDB service, keep `27017` private and reachable only on Docker internal networking
