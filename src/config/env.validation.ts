@@ -7,7 +7,7 @@ const environmentSchema = Joi.object<EnvironmentVariables>({
     .valid('development', 'test', 'production')
     .default('development'),
   PORT: Joi.number().port().default(3000),
-  MONGODB_URI: Joi.string().uri({ scheme: ['mongodb', 'mongodb+srv'] }).required(),
+  MONGODB_URI: Joi.string().uri().required(),
   CORS_ALLOWED_ORIGINS: Joi.string().allow('').optional(),
   TRUST_PROXY: Joi.boolean().truthy('true').truthy('1').falsy('false').falsy('0').default(false),
   JWT_ACCESS_SECRET: Joi.string().min(16).required(),
